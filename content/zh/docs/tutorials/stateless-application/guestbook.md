@@ -114,6 +114,7 @@ The manifest file, included below, specifies a Deployment controller that runs a
       ```shell
       kubectl get pods
       ```
+
 <!--
       The response should be similar to this:
 -->
@@ -149,7 +150,7 @@ Replace POD-NAME with the name of your Pod.
 ### 创建 Redis 主节点的服务
 
 <!--
-The guestbook applications needs to communicate to the Redis master to write its data. You need to apply a [Service](/docs/concepts/services-networking/service/) to proxy the traffic to the Redis master Pod. A Service defines a policy to access the Pods.
+The guestbook application needs to communicate to the Redis master to write its data. You need to apply a [Service](/docs/concepts/services-networking/service/) to proxy the traffic to the Redis master Pod. A Service defines a policy to access the Pods.
 -->
 留言板应用程序需要往 Redis 主节点中写数据。因此，需要创建 [Service](/zh/docs/concepts/services-networking/service/) 来代理 Redis 主节点 Pod 的流量。Service 定义了访问 Pod 的策略。
 
@@ -402,7 +403,7 @@ Some cloud providers, like Google Compute Engine or Google Kubernetes Engine, su
 
       ```
       NAME           TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)        AGE
-      frontend       ClusterIP   10.0.0.112   <none>       80:31323/TCP   6s
+      frontend       NodePort    10.0.0.112   <none>       80:31323/TCP   6s
       kubernetes     ClusterIP   10.0.0.1     <none>        443/TCP        4m
       redis-master   ClusterIP   10.0.0.151   <none>        6379/TCP       2m
       redis-slave    ClusterIP   10.0.0.223   <none>        6379/TCP       1m
@@ -615,16 +616,18 @@ Deleting the Deployments and Services also deletes any running Pods. Use labels 
 
 
 <!--
+* Add [ELK logging and monitoring](/docs/tutorials/stateless-application/guestbook-logs-metrics-with-elk/) to your Guestbook application
 * Complete the [Kubernetes Basics](/docs/tutorials/kubernetes-basics/) Interactive Tutorials
 * Use Kubernetes to create a blog using [Persistent Volumes for MySQL and Wordpress](/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/#visit-your-new-wordpress-blog)
 * Read more about [connecting applications](/docs/concepts/services-networking/connect-applications-service/)
 * Read more about [Managing Resources](/docs/concepts/cluster-administration/manage-deployment/#using-labels-effectively)
 -->
 
+* 为 Guestbook 应用添加
+  [ELK 日志与监控](/zh/docs/tutorials/stateless-application/guestbook-logs-metrics-with-elk/)
 * 完成 [Kubernetes Basics](/zh/docs/tutorials/kubernetes-basics/) 交互式教程
 * 使用 Kubernetes 创建一个博客，使用 [MySQL 和 Wordpress 的持久卷](/zh/docs/tutorials/stateful-application/mysql-wordpress-persistent-volume/#visit-your-new-wordpress-blog)
 * 阅读更多关于[连接应用程序](/zh/docs/concepts/services-networking/connect-applications-service/)
 * 阅读更多关于[管理资源](/zh/docs/concepts/cluster-administration/manage-deployment/#using-labels-effectively)
-
 
 

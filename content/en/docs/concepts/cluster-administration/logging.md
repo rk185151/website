@@ -9,7 +9,7 @@ weight: 60
 
 <!-- overview -->
 
-Application and systems logs can help you understand what is happening inside your cluster. The logs are particularly useful for debugging problems and monitoring cluster activity. Most modern applications have some kind of logging mechanism; as such, most container engines are likewise designed to support some kind of logging. The easiest and most embraced logging method for containerized applications is to write to the standard output and standard error streams.
+Application logs can help you understand what is happening inside your application. The logs are particularly useful for debugging problems and monitoring cluster activity. Most modern applications have some kind of logging mechanism; as such, most container engines are likewise designed to support some kind of logging. The easiest and most embraced logging method for containerized applications is to write to the standard output and standard error streams.
 
 However, the native functionality provided by a container engine or runtime is usually not enough for a complete logging solution. For example, if a container crashes, a pod is evicted, or a node dies, you'll usually still want to access your application's logs. As such, logs should have a separate storage and lifecycle independent of nodes, pods, or containers. This concept is called _cluster-level-logging_. Cluster-level logging requires a separate backend to store, analyze, and query logs. Kubernetes provides no native storage solution for log data, but you can integrate many existing logging solutions into your Kubernetes cluster.
 
@@ -24,8 +24,8 @@ the description of how logs are stored and handled on the node to be useful.
 
 In this section, you can see an example of basic logging in Kubernetes that
 outputs data to the standard output stream. This demonstration uses
-a [pod specification](/examples/debug/counter-pod.yaml) with
-a container that writes some text to standard output once per second.
+a pod specification with a container that writes some text to standard output
+once per second.
 
 {{< codenew file="debug/counter-pod.yaml" >}}
 
@@ -80,7 +80,7 @@ default rotation is configured to take place when log file exceeds 10MB.
 
 As an example, you can find detailed information about how `kube-up.sh` sets
 up logging for COS image on GCP in the corresponding
-[script](https://github.com/kubernetes/kubernetes/blob/{{< param "githubbranch" >}}/cluster/gce/gci/configure-helper.sh)
+[script](https://github.com/kubernetes/kubernetes/blob/{{< param "githubbranch" >}}/cluster/gce/gci/configure-helper.sh).
 
 When you run [`kubectl logs`](/docs/reference/generated/kubectl/kubectl-commands#logs) as in
 the basic logging example, the kubelet on the node handles the request and
@@ -94,6 +94,7 @@ the rotation and there are two files, one 10MB in size and one empty,
 `kubectl logs` will return an empty response.
 {{< /note >}}
 
+[cosConfigureHelper]: https://github.com/kubernetes/kubernetes/blob/{{< param "githubbranch" >}}/cluster/gce/gci/configure-helper.sh
 ### System component logs
 
 There are two types of system components: those that run in a container and those

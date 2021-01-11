@@ -245,13 +245,14 @@ well as lower-trust users.The following listed controls should be enforced/disal
 		<tr>
 			<td>Seccomp</td>
 			<td>
-				The 'runtime/default' seccomp profile must be required, or allow specific additional profiles.<br>
+				The RuntimeDefault seccomp profile must be required, or allow specific additional profiles.<br>
 				<br><b>Restricted Fields:</b><br>
-				metadata.annotations['seccomp.security.alpha.kubernetes.io/pod']<br>
-				metadata.annotations['container.seccomp.security.alpha.kubernetes.io/*']<br>
+				spec.securityContext.seccompProfile.type<br>
+				spec.containers[*].securityContext.seccompProfile<br>
+				spec.initContainers[*].securityContext.seccompProfile<br>
 				<br><b>Allowed Values:</b><br>
 				'runtime/default'<br>
-				undefined (container annotation)<br>
+				undefined / nil<br>
 			</td>
 		</tr>
 	</tbody>
@@ -291,7 +292,7 @@ Containers at runtime. Security contexts are defined as part of the Pod and cont
 in the Pod manifest, and represent parameters to the container runtime.
 
 Security policies are control plane mechanisms to enforce specific settings in the Security Context,
-as well as other parameters outside the Security Contex. As of February 2020, the current native
+as well as other parameters outside the Security Context. As of February 2020, the current native
 solution for enforcing these security policies is [Pod Security
 Policy](/docs/concepts/policy/pod-security-policy/) - a mechanism for centrally enforcing security
 policy on Pods across a cluster. Other alternatives for enforcing security policy are being
@@ -316,6 +317,6 @@ restrict privileged permissions is lessened when the workload is isolated from t
 kernel. This allows for workloads requiring heightened permissions to still be isolated.
 
 Additionally, the protection of sandboxed workloads is highly dependent on the method of
-sandboxing. As such, no single ‘recommended’ policy is recommended for all sandboxed workloads.
+sandboxing. As such, no single recommended policy is recommended for all sandboxed workloads.
 
 

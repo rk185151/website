@@ -15,7 +15,7 @@ weight: 90
 
 <!-- overview -->
 
-The Horizontal Pod Autoscaler automatically scales the number of pods
+The Horizontal Pod Autoscaler automatically scales the number of Pods
 in a replication controller, deployment, replica set or stateful set based on observed CPU utilization (or, with
 [custom metrics](https://git.k8s.io/community/contributors/design-proposals/instrumentation/custom-metrics-api.md)
 support, on some other application-provided metrics). Note that Horizontal
@@ -45,16 +45,16 @@ obtains the metrics from either the resource metrics API (for per-pod resource m
 or the custom metrics API (for all other metrics).
 
 * For per-pod resource metrics (like CPU), the controller fetches the metrics
-  from the resource metrics API for each pod targeted by the HorizontalPodAutoscaler.
+  from the resource metrics API for each Pod targeted by the HorizontalPodAutoscaler.
   Then, if a target utilization value is set, the controller calculates the utilization
   value as a percentage of the equivalent resource request on the containers in
-  each pod.  If a target raw value is set, the raw metric values are used directly.
+  each Pod.  If a target raw value is set, the raw metric values are used directly.
   The controller then takes the mean of the utilization or the raw value (depending on the type
-  of target specified) across all targeted pods, and produces a ratio used to scale
+  of target specified) across all targeted Pods, and produces a ratio used to scale
   the number of desired replicas.
 
-  Please note that if some of the pod's containers do not have the relevant resource request set,
-  CPU utilization for the pod will not be defined and the autoscaler will
+  Please note that if some of the Pod's containers do not have the relevant resource request set,
+  CPU utilization for the Pod will not be defined and the autoscaler will
   not take any action for that metric. See the [algorithm
   details](#algorithm-details) section below for more information about
   how the autoscaling algorithm works.
@@ -65,7 +65,7 @@ or the custom metrics API (for all other metrics).
 * For object metrics and external metrics, a single metric is fetched, which describes
   the object in question. This metric is compared to the target
   value, to produce a ratio as above. In the `autoscaling/v2beta2` API
-  version, this value can optionally be divided by the number of pods before the
+  version, this value can optionally be divided by the number of Pods before the
   comparison is made.
 
 The HorizontalPodAutoscaler normally fetches metrics from a series of aggregated APIs (`metrics.k8s.io`,
@@ -234,6 +234,75 @@ the delay value is set too short, the scale of the replicas set may keep thrashi
 usual.
 {{< /note >}}
 
+## Support for resource metrics
+
+Any HPA target can be scaled based on the resource usage of the pods in the scaling target.
+When defining the pod specification the resource requests like `cpu` and `memory` should
+be specified. This is used to determine the resource utilization and used by the HPA controller
+to scale the target up or down. To use resource utilization based scaling specify a metric source
+like this:
+
+```yaml
+type: Resource
+resource:
+  name: cpu
+  target:
+    type: Utilization
+    averageUtilization: 60
+```
+With this metric the HPA controller will keep the average utilization of the pods in the scaling
+target at 60%. Utilization is the ratio between the current usage of resource to the requested
+resources of the pod. See [Algorithm](#algorithm-details) for more details about how the utilization
+is calculated and averaged.
+
+{{< note >}}
+Since the resource usages of all the containers are summed up the total pod utilization may not
+accurately represent the individual container resource usage. This could lead to situations where
+a single container might be running with high usage and the HPA will not scale out because the overall
+pod usage is still within acceptable limits.
+{{< /note >}}
+
+### Container Resource Metrics
+
+{{< feature-state for_k8s_version="v1.20" state="alpha" >}}
+
+`HorizontalPodAutoscaler` also supports a container metric source where the HPA can track the
+resource usage of individual containers across a set of Pods, in order to scale the target resource.
+This lets you configure scaling thresholds for the containers that matter most in a particular Pod.
+For example, if you have a web application and a logging sidecar, you can scale based on the resource
+use of the web application, ignoring the sidecar container and its resource use.
+
+If you revise the target resource to have a new Pod specification with a different set of containers,
+you should revise the HPA spec if that newly added container should also be used for
+scaling. If the specified container in the metric source is not present or only present in a subset
+of the pods then those pods are ignored and the recommendation is recalculated. See [Algorithm](#algorithm-details)
+for more details about the calculation. To use container resources for autoscaling define a metric
+source as follows:
+```yaml
+type: ContainerResource
+containerResource:
+  name: cpu
+  container: application
+  target:
+    type: Utilization
+    averageUtilization: 60
+```
+
+In the above example the HPA controller scales the target such that the average utilization of the cpu
+in the `application` container of all the pods is 60%.
+
+{{< note >}}
+If you change the name of a container that a HorizontalPodAutoscaler is tracking, you can
+make that change in a specific order to ensure scaling remains available and effective
+whilst the change is being applied. Before you update the resource that defines the container
+(such as a Deployment), you should update the associated HPA to track both the new and
+old container names. This way, the HPA is able to calculate a scaling recommendation
+throughout the update process.
+
+Once you have rolled out the container name change to the workload resource, tidy up by removing
+the old container name from the HPA specification.
+{{< /note >}}
+
 ## Support for multiple metrics
 
 Kubernetes 1.6 adds support for scaling based on multiple metrics. You can use the `autoscaling/v2beta2` API
@@ -265,12 +334,12 @@ APIs, cluster administrators must ensure that:
 
 * The corresponding APIs are registered:
 
-   * For resource metrics, this is the `metrics.k8s.io` API, generally provided by [metrics-server](https://github.com/kubernetes-incubator/metrics-server).
+   * For resource metrics, this is the `metrics.k8s.io` API, generally provided by [metrics-server](https://github.com/kubernetes-sigs/metrics-server).
      It can be launched as a cluster addon.
 
    * For custom metrics, this is the `custom.metrics.k8s.io` API.  It's provided by "adapter" API servers provided by metrics solution vendors.
      Check with your metrics pipeline, or the [list of known solutions](https://github.com/kubernetes/metrics/blob/master/IMPLEMENTATIONS.md#custom-metrics-api).
-     If you would like to write your own, check out the [boilerplate](https://github.com/kubernetes-incubator/custom-metrics-apiserver) to get started.
+     If you would like to write your own, check out the [boilerplate](https://github.com/kubernetes-sigs/custom-metrics-apiserver) to get started.
 
    * For external metrics, this is the `external.metrics.k8s.io` API.  It may be provided by the custom metrics adapters provided above.
 
@@ -319,7 +388,7 @@ For instance if there are 80 replicas and the target has to be scaled down to 10
 then during the first step 8 replicas will be reduced. In the next iteration when the number
 of replicas is 72, 10% of the pods is 7.2 but the number is rounded up to 8. On each loop of
 the autoscaler controller the number of pods to be change is re-calculated based on the number
-of current replicas. When the number of replicas falls below 40 the first policy_(Pods)_ is applied
+of current replicas. When the number of replicas falls below 40 the first policy _(Pods)_ is applied
 and 4 replicas will be reduced at a time.
 
 `periodSeconds` indicates the length of time in the past for which the policy must hold true.
@@ -328,7 +397,7 @@ allows at most 10% of the current replicas to be scaled down in one minute.
 
 The policy selection can be changed by specifying the `selectPolicy` field for a scaling
 direction. By setting the value to `Min` which would select the policy which allows the
-smallest change in the replica count. Setting the value to `Disabled` completely disabled
+smallest change in the replica count. Setting the value to `Disabled` completely disables
 scaling in that direction.
 
 ### Stabilization Window
@@ -405,8 +474,9 @@ behavior:
       periodSeconds: 60
 ```
 
-To allow a final drop of 5 pods, another policy can be added and a selection
-strategy of minimum:
+To ensure that no more than 5 Pods are removed per minute, you can add a second scale-down
+policy with a fixed size of 5, and set `selectPolicy` to minimum. Setting `selectPolicy` to `Min` means
+that the autoscaler chooses the policy that affects the smallest number of Pods:
 
 ```yaml
 behavior:
@@ -418,7 +488,7 @@ behavior:
     - type: Pods
       value: 5
       periodSeconds: 60
-    selectPolicy: Max
+    selectPolicy: Min
 ```
 
 ### Example: disable scale down
@@ -432,7 +502,14 @@ behavior:
     selectPolicy: Disabled
 ```
 
+## Implicit maintenance-mode deactivation
 
+You can implicitly deactivate the HPA for a target without the
+need to change the HPA configuration itself. If the target's desired replica count
+is set to 0, and the HPA's minimum replica count is greater than 0, the HPA 
+stops adjusting the target (and sets the `ScalingActive` Condition on itself
+to `false`) until you reactivate it by manually adjusting the target's desired
+replica count or HPA's minimum replica count.
 
 ## {{% heading "whatsnext" %}}
 
@@ -440,5 +517,3 @@ behavior:
 * Design documentation: [Horizontal Pod Autoscaling](https://git.k8s.io/community/contributors/design-proposals/autoscaling/horizontal-pod-autoscaler.md).
 * kubectl autoscale command: [kubectl autoscale](/docs/reference/generated/kubectl/kubectl-commands/#autoscale).
 * Usage example of [Horizontal Pod Autoscaler](/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/).
-
-

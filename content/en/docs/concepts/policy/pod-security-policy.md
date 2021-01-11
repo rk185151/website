@@ -4,7 +4,7 @@ reviewers:
 - tallclair
 title: Pod Security Policies
 content_type: concept
-weight: 20
+weight: 30
 ---
 
 <!-- overview -->
@@ -140,13 +140,17 @@ For a complete example of authorizing a PodSecurityPolicy, see
 
 ### Troubleshooting
 
-- The [Controller Manager](/docs/reference/command-line-tools-reference/kube-controller-manager/) must be run
-against [the secured API port](/docs/reference/access-authn-authz/controlling-access/),
-and must not have superuser permissions. Otherwise requests would bypass
-authentication and authorization modules, all PodSecurityPolicy objects would be
-allowed, and users would be able to create privileged containers. For more details
-on configuring Controller Manager authorization, see
-[Controller Roles](/docs/reference/access-authn-authz/rbac/#controller-roles).
+- The [controller manager](/docs/reference/command-line-tools-reference/kube-controller-manager/)
+  must be run against the secured API port and must not have superuser permissions. See
+  [Controlling Access to the Kubernetes API](/docs/concepts/security/controlling-access)
+  to learn about API server access controls.  
+  If the controller manager connected through the trusted API port (also known as the
+  `localhost` listener), requests would bypass authentication and authorization modules;
+  all PodSecurityPolicy objects would be allowed, and users would be able to create grant
+  themselves the ability to create privileged containers.
+
+  For more details on configuring controller manager authorization, see
+  [Controller Roles](/docs/reference/access-authn-authz/rbac/#controller-roles).
 
 ## Policy Order
 
@@ -212,12 +216,17 @@ kubectl-user create -f- <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
-  name:      pause
+  name: pause
 spec:
   containers:
-    - name:  pause
+    - name: pause
       image: k8s.gcr.io/pause
 EOF
+```
+
+The output is similar to this:
+
+```
 Error from server (Forbidden): error when creating "STDIN": pods "pause" is forbidden: unable to validate against any pod security policy: []
 ```
 
@@ -260,12 +269,17 @@ kubectl-user create -f- <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
-  name:      pause
+  name: pause
 spec:
   containers:
-    - name:  pause
+    - name: pause
       image: k8s.gcr.io/pause
 EOF
+```
+
+The output is similar to this
+
+```
 pod "pause" created
 ```
 
@@ -277,14 +291,19 @@ kubectl-user create -f- <<EOF
 apiVersion: v1
 kind: Pod
 metadata:
-  name:      privileged
+  name: privileged
 spec:
   containers:
-    - name:  pause
+    - name: pause
       image: k8s.gcr.io/pause
       securityContext:
         privileged: true
 EOF
+```
+
+The output is similar to this:
+
+```
 Error from server (Forbidden): error when creating "STDIN": pods "privileged" is forbidden: unable to validate against any pod security policy: [spec.containers[0].securityContext.privileged: Invalid value: true: Privileged containers are not allowed]
 ```
 
@@ -596,8 +615,11 @@ documentation](/docs/tutorials/clusters/apparmor/#podsecuritypolicy-annotations)
 
 ### Seccomp
 
-The use of seccomp profiles in pods can be controlled via annotations on the
-PodSecurityPolicy. Seccomp is an alpha feature in Kubernetes.
+As of Kubernetes v1.19, you can use the `seccompProfile` field in the
+`securityContext` of Pods or containers to [control use of seccomp
+profiles](/docs/tutorials/clusters/seccomp). In prior versions, seccomp was
+controlled by adding annotations to a Pod. The same PodSecurityPolicies can be
+used with either version to enforce how these fields or annotations are applied.
 
 **seccomp.security.alpha.kubernetes.io/defaultProfileName** - Annotation that
 specifies the default seccomp profile to apply to containers. Possible values
@@ -606,11 +628,18 @@ are:
 - `unconfined` - Seccomp is not applied to the container processes (this is the
   default in Kubernetes), if no alternative is provided.
 - `runtime/default` - The default container runtime profile is used.
-- `docker/default` - The Docker default seccomp profile is used. Deprecated as of
-  Kubernetes 1.11. Use `runtime/default` instead.
+- `docker/default` - The Docker default seccomp profile is used. Deprecated as
+  of Kubernetes 1.11. Use `runtime/default` instead.
 - `localhost/<path>` - Specify a profile as a file on the node located at
   `<seccomp_root>/<path>`, where `<seccomp_root>` is defined via the
-  `--seccomp-profile-root` flag on the Kubelet.
+  `--seccomp-profile-root` flag on the Kubelet. If the `--seccomp-profile-root`
+  flag is not defined, the default path will be used, which is
+  `<root-dir>/seccomp` where `<root-dir>` is specified by the `--root-dir` flag.
+
+{{< note >}}
+  The `--seccomp-profile-root` flag is deprecated since Kubernetes
+  v1.19. Users are encouraged to use the default path.
+{{< /note >}}
 
 **seccomp.security.alpha.kubernetes.io/allowedProfileNames** - Annotation that
 specifies which values are allowed for the pod seccomp annotations. Specified as

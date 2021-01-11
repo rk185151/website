@@ -102,7 +102,7 @@ on control plane nodes when using `kubeadm init` and `kubeadm join --control-pla
 <!--
 ![Stacked etcd topology](/images/kubeadm/kubeadm-ha-topology-stacked-etcd.svg)
 -->
-！[堆叠的 etcd 拓扑](/images/kubeadm/kubeadm-ha-topology-stacked-etcd.svg)
+![堆叠的 etcd 拓扑](/images/kubeadm/kubeadm-ha-topology-stacked-etcd.svg)
 
 <!--
 ## External etcd topology
@@ -136,7 +136,7 @@ A minimum of three hosts for control plane nodes and three hosts for etcd nodes 
 <!--
 ![External etcd topology](/images/kubeadm/kubeadm-ha-topology-external-etcd.svg)
 -->
-！[外部 etcd 拓扑](/images/kubeadm/kubeadm-ha-topology-external-etcd.svg)
+![外部 etcd 拓扑](/images/kubeadm/kubeadm-ha-topology-external-etcd.svg)
 
 
 
@@ -146,6 +146,6 @@ A minimum of three hosts for control plane nodes and three hosts for etcd nodes 
 <!--
 - [Set up a highly available cluster with kubeadm](/docs/setup/production-environment/tools/kubeadm/high-availability/)
 -->
- -  [使用 kubeadm 设置高可用集群](/docs/setup/production-environment/tools/kubeadm/high-availability/)
+ -  [使用 kubeadm 设置高可用集群](/zh/docs/setup/production-environment/tools/kubeadm/high-availability/)
 
 

@@ -7,6 +7,8 @@ weight: 10
 card:
   name: concepts
   weight: 10
+sitemap:
+  priority: 0.9
 ---
 
 <!-- overview -->
@@ -35,7 +37,7 @@ Wirtualizacja pozwala lepiej wykorzystywać zasoby fizycznego serwera i lepiej s
 Każda maszyna wirtualna jest pełną maszyną zawierającą własny system operacyjny pracujący na zwirtualizowanej warstwie sprzętowej.
 
 **Era wdrożeń w kontenerach:**
-Kontenery działają w sposób zbliżony do maszyn wirtualnych, ale mają mniejszy stopnień wzajemnej izolacji, współdzieląc ten sam system operacyjny. Kontenery określane są mianem "lekkich". Podobnie, jak maszyna wirtualna, kontener posiada własny system plików, procesor, pamięć, przestrzeń procesów itd. Ponieważ kontenery nie są związane z leżącymi poniżej warstwami infrastruktury, mogą być łatwiej przenoszone pomiędzy chmurami i różnymi dystrybucjami systemu operacyjnego.
+Kontenery działają w sposób zbliżony do maszyn wirtualnych, ale mają mniejszy stopnień wzajemnej izolacji, współdzieląc ten sam system operacyjny. Kontenery określane są mianem "lekkich". Podobnie, jak maszyna wirtualna, kontener posiada własny system plików, udział w zasobach procesora, pamięć, przestrzeń procesów itd. Ponieważ kontenery nie są związane z leżącymi poniżej warstwami infrastruktury, mogą być łatwiej przenoszone pomiędzy chmurami i różnymi dystrybucjami systemu operacyjnego.
 
 Kontenery zyskały popularność ze względu na swoje zalety, takie jak:
 
@@ -58,17 +60,17 @@ I tu właśnie Kubernetes przychodzi z pomocą! Kubernetes dostarcza środowisko
 
 Kubernetes zapewnia:
 
-* **Detekcję nowych serwisów i balansowanie ruchu**  
+* **Detekcję nowych serwisów i balansowanie ruchu**
 Kubernetes może udostępnić kontener używając nazwy DNS lub swojego własnego adresu IP. Jeśli ruch przychodzący do kontenera jest duży, Kubernetes może balansować obciążenie i przekierować ruch sieciowy, aby zapewnić stabilność całej instalacji.
-* **Zarządzanie obsługą składowania danych**  
+* **Zarządzanie obsługą składowania danych**
 Kubernetes umożliwia automatyczne montowanie systemów składowania danych dowolnego typu — lokalnych, od dostawców chmurowych i innych.
-* **Automatyczne wdrożenia i wycofywanie zmian**  
+* **Automatyczne wdrożenia i wycofywanie zmian**
 Możesz opisać oczekiwany stan instalacji za pomocą Kubernetesa, który zajmie się doprowadzeniem w sposób kontrolowany stanu faktycznego do stanu oczekiwanego. Przykładowo, przy pomocy Kubernetesa możesz zautomatyzować proces tworzenia nowych kontenerów na potrzeby swojego wdrożenia, usuwania istniejących i przejęcia zasobów przez nowe kontenery.
 * **Automatyczne zarządzanie dostępnymi zasobami**
 Twoim zadaniem jest dostarczenie klastra maszyn, które Kubernetes może wykorzystać do uruchamiania zadań w kontenerach. Określasz zapotrzebowanie na moc procesora i pamięć RAM dla każdego z kontenerów. Kubernetes rozmieszcza kontenery na maszynach w taki sposób, aby jak najlepiej wykorzystać dostarczone zasoby.
-* **Samoczynne naprawianie**  
+* **Samoczynne naprawianie**
 Kubernetes restartuje kontenery, które przestały działać, wymienia je na nowe, wymusza wyłączenie kontenerów, które nie odpowiadają na określone zapytania o stan i nie rozgłasza powiadomień o ich dostępności tak długo, dopóki nie są gotowe do działania.
-* **Zarządzanie informacjami poufnymi i konfiguracją**  
+* **Zarządzanie informacjami poufnymi i konfiguracją**
 Kubernetes pozwala składować i zarządzać informacjami poufnymi, takimi jak hasła, tokeny OAuth i klucze SSH. Informacje poufne i zawierające konfigurację aplikacji mogą być dostarczane i zmieniane bez konieczności ponownego budowania obrazu kontenerów i bez ujawniania poufnych danych w ogólnej konfiguracji oprogramowania.
 
 ## Czym Kubernetes nie jest
@@ -85,10 +87,7 @@ Kubernetes:
 * Nie zapewnia, ani nie wykorzystuje żadnego ogólnego systemu do zarządzania konfiguracją, utrzymaniem i samo-naprawianiem maszyn.
 * Co więcej, nie jest zwykłym systemem planowania *(orchestration)*. W rzeczywistości, eliminuje konieczność orkiestracji. Zgodnie z definicją techniczną, orkiestracja to wykonywanie określonego ciągu zadań: najpierw A, potem B i następnie C. Dla kontrastu, Kubernetes składa się z wielu niezależnych, możliwych do złożenia procesów sterujących, których zadaniem jest doprowadzenie stanu faktycznego do stanu oczekiwanego. Nie ma znaczenia, w jaki sposób przechodzi się od A do C. Nie ma konieczności scentralizowanego zarządzania. Dzięki temu otrzymujemy system, który jest potężniejszy, bardziej odporny i niezawodny i dający więcej możliwości rozbudowy.
 
-
-
 ## {{% heading "whatsnext" %}}
 
-*   Dowiedz się o [komponentach Kubernetesa](/pl/docs/concepts/overview/components/)
-*   Jesteś gotowy [zacząć pracę](/pl/docs/setup/)?
-
+* Dowiedz się o [komponentach Kubernetesa](/pl/docs/concepts/overview/components/)
+* Jesteś gotowy [zacząć pracę](/pl/docs/setup/)?

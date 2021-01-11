@@ -54,7 +54,7 @@ The `kubernetes.io/` and `k8s.io/` prefixes are reserved for Kubernetes core com
 
 Valid label values must be 63 characters or less and must be empty or begin and end with an alphanumeric character (`[a-z0-9A-Z]`) with dashes (`-`), underscores (`_`), dots (`.`), and alphanumerics between.
 
-For example, here’s the configuration file for a Pod that has two labels `environment: production` and `app: nginx` :
+For example, here's the configuration file for a Pod that has two labels `environment: production` and `app: nginx` :
 
 ```yaml
 
@@ -140,10 +140,11 @@ partition
 !partition
 ```
 
-The first example selects all resources with key equal to `environment` and value equal to `production` or `qa`.
-The second example selects all resources with key equal to `tier` and values other than `frontend` and `backend`, and all resources with no labels with the `tier` key.
-The third example selects all resources including a label with key `partition`; no values are checked.
-The fourth example selects all resources without a label with key `partition`; no values are checked.
+* The first example selects all resources with key equal to `environment` and value equal to `production` or `qa`.
+* The second example selects all resources with key equal to `tier` and values other than `frontend` and `backend`, and all resources with no labels with the `tier` key.
+* The third example selects all resources including a label with key `partition`; no values are checked.
+* The fourth example selects all resources without a label with key `partition`; no values are checked.
+
 Similarly the comma separator acts as an _AND_ operator. So filtering resources with a `partition` key (no matter the value) and with `environment` different than  `qa` can be achieved using `partition,environment notin (qa)`.
 The _set-based_ label selector is a general form of equality since `environment=production` is equivalent to `environment in (production)`; similarly for `!=` and `notin`.
 
@@ -188,7 +189,7 @@ kubectl get pods -l 'environment,environment notin (frontend)'
 Some Kubernetes objects, such as [`services`](/docs/concepts/services-networking/service/)
 and [`replicationcontrollers`](/docs/concepts/workloads/controllers/replicationcontroller/),
 also use label selectors to specify sets of other resources, such as
-[pods](/docs/concepts/workloads/pods/pod/).
+[pods](/docs/concepts/workloads/pods/).
 
 #### Service and ReplicationController
 

@@ -9,7 +9,7 @@ weight: 20
 
 <!-- overview -->
 
-{{< feature-state for_k8s_version="v1.14" state="beta" >}}
+{{< feature-state for_k8s_version="v1.20" state="stable" >}}
 
 This page describes the RuntimeClass resource and runtime selection mechanism.
 
@@ -51,7 +51,7 @@ CRI implementation for how to configure.
 {{< note >}}
 RuntimeClass assumes a homogeneous node configuration across the cluster by default (which means
 that all nodes are configured the same way with respect to container runtimes). To support
-heterogenous node configurations, see [Scheduling](#scheduling) below.
+heterogeneous node configurations, see [Scheduling](#scheduling) below.
 {{< /note >}}
 
 The configurations have a corresponding `handler` name, referenced by the RuntimeClass. The
@@ -66,7 +66,7 @@ The RuntimeClass resource currently only has 2 significant fields: the RuntimeCl
 (`metadata.name`) and the handler (`handler`). The object definition looks like this:
 
 ```yaml
-apiVersion: node.k8s.io/v1beta1  # RuntimeClass is defined in the node.k8s.io API group
+apiVersion: node.k8s.io/v1  # RuntimeClass is defined in the node.k8s.io API group
 kind: RuntimeClass
 metadata:
   name: myclass  # The name the RuntimeClass will be referenced by
@@ -144,7 +144,7 @@ See CRI-O's [config documentation](https://raw.githubusercontent.com/cri-o/cri-o
 
 {{< feature-state for_k8s_version="v1.16" state="beta" >}}
 
-As of Kubernetes v1.16, RuntimeClass includes support for heterogenous clusters through its
+As of Kubernetes v1.16, RuntimeClass includes support for heterogeneous clusters through its
 `scheduling` fields. Through the use of these fields, you can ensure that pods running with this
 RuntimeClass are scheduled to nodes that support it. To use the scheduling support, you must have
 the [RuntimeClass admission controller](/docs/reference/access-authn-authz/admission-controllers/#runtimeclass)
@@ -181,9 +181,8 @@ are accounted for in Kubernetes.
 ## {{% heading "whatsnext" %}}
 
 
-- [RuntimeClass Design](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/runtime-class.md)
-- [RuntimeClass Scheduling Design](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/runtime-class-scheduling.md)
-- Read about the [Pod Overhead](/docs/concepts/configuration/pod-overhead/) concept
+- [RuntimeClass Design](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md)
+- [RuntimeClass Scheduling Design](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/585-runtime-class/README.md#runtimeclass-scheduling)
+- Read about the [Pod Overhead](/docs/concepts/scheduling-eviction/pod-overhead/) concept
 - [PodOverhead Feature Design](https://github.com/kubernetes/enhancements/blob/master/keps/sig-node/20190226-pod-overhead.md)
-
 

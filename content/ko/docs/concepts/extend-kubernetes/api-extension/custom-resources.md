@@ -13,7 +13,7 @@ weight: 10
 <!-- body -->
 ## 커스텀 리소스
 
-*리소스* 는 [쿠버네티스 API](/ko/docs/reference/using-api/api-overview/)에서 특정 종류의
+*리소스* 는 [쿠버네티스 API](/ko/docs/concepts/overview/kubernetes-api/)에서 특정 종류의
 [API 오브젝트](/ko/docs/concepts/overview/working-with-objects/kubernetes-objects/) 모음을 저장하는 엔드포인트이다. 예를 들어 빌트인 *파드* 리소스에는 파드 오브젝트 모음이 포함되어 있다.
 
 *커스텀 리소스* 는 쿠버네티스 API의 익스텐션으로, 기본 쿠버네티스 설치에서 반드시
@@ -96,7 +96,7 @@ _선언_ 하거나 지정할 수 있게 해주며 쿠버네티스 오브젝트�
 * 파일이 업데이트될 때 디플로이먼트 등을 통해 롤링 업데이트를 수행하려고 한다.
 
 {{< note >}}
-민감한 데이터에는 [시크릿](/docs/concepts/configuration/secret/)을 사용하자. 이는 컨피그맵과 비슷하지만 더 안전한다.
+민감한 데이터에는 [시크릿](/ko/docs/concepts/configuration/secret/)을 사용하자. 이는 컨피그맵과 비슷하지만 더 안전한다.
 {{< /note >}}
 
 다음 중 대부분이 적용되는 경우 커스텀 리소스(CRD 또는 애그리게이트 API(aggregated API))를 사용하자.

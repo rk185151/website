@@ -19,7 +19,7 @@ weight: 75
 
 ## 시작하기 전에
 
-* [윈도우 서버에서 운영하는 마스터와 워커 노드](/docs/tasks/administer-cluster/kubeadm/adding-windows-nodes)를 포함한 쿠버네티스 클러스터를 생성한다.
+* [윈도우 서버에서 운영하는 마스터와 워커 노드](/ko/docs/tasks/administer-cluster/kubeadm/adding-windows-nodes)를 포함한 쿠버네티스 클러스터를 생성한다.
 * 쿠버네티스에서 서비스와 워크로드를 생성하고 배포하는 것은 리눅스나 윈도우 컨테이너 모두 비슷한 방식이라는 것이 중요하다. [Kubectl 커맨드](/ko/docs/reference/kubectl/overview/)로 클러스터에 접속하는 것은 동일하다. 아래 단원의 예시는 윈도우 컨테이너를 경험하기 위해 제공한다.
 
 ## 시작하기: 윈도우 컨테이너 배포하기
@@ -65,7 +65,7 @@ spec:
         command:
         - powershell.exe
         - -command
-        - "<#code used from https://gist.github.com/wagnerandrade/5424431#> ; $$listener = New-Object System.Net.HttpListener ; $$listener.Prefixes.Add('http://*:80/') ; $$listener.Start() ; $$callerCounts = @{} ; Write-Host('Listening at http://*:80/') ; while ($$listener.IsListening) { ;$$context = $$listener.GetContext() ;$$requestUrl = $$context.Request.Url ;$$clientIP = $$context.Request.RemoteEndPoint.Address ;$$response = $$context.Response ;Write-Host '' ;Write-Host('> {0}' -f $$requestUrl) ;  ;$$count = 1 ;$$k=$$callerCounts.Get_Item($$clientIP) ;if ($$k -ne $$null) { $$count += $$k } ;$$callerCounts.Set_Item($$clientIP, $$count) ;$$ip=(Get-NetAdapter | Get-NetIpAddress); $$header='<html><body><H1>Windows Container Web Server</H1>' ;$$callerCountsString='' ;$$callerCounts.Keys | % { $$callerCountsString+='<p>IP {0} callerCount {1} ' -f $$ip[1].IPAddress,$$callerCounts.Item($$_) } ;$$footer='</body></html>' ;$$content='{0}{1}{2}' -f $$header,$$callerCountsString,$$footer ;Write-Output $$content ;$$buffer = [System.Text.Encoding]::UTF8.GetBytes($$content) ;$$response.ContentLength64 = $$buffer.Length ;$$response.OutputStream.Write($$buffer, 0, $$buffer.Length) ;$$response.Close() ;$$responseStatus = $$response.StatusCode ;Write-Host('< {0}' -f $$responseStatus)  } ; "
+        - "<#code used from https://gist.github.com/19WAS85/5424431#> ; $$listener = New-Object System.Net.HttpListener ; $$listener.Prefixes.Add('http://*:80/') ; $$listener.Start() ; $$callerCounts = @{} ; Write-Host('Listening at http://*:80/') ; while ($$listener.IsListening) { ;$$context = $$listener.GetContext() ;$$requestUrl = $$context.Request.Url ;$$clientIP = $$context.Request.RemoteEndPoint.Address ;$$response = $$context.Response ;Write-Host '' ;Write-Host('> {0}' -f $$requestUrl) ;  ;$$count = 1 ;$$k=$$callerCounts.Get_Item($$clientIP) ;if ($$k -ne $$null) { $$count += $$k } ;$$callerCounts.Set_Item($$clientIP, $$count) ;$$ip=(Get-NetAdapter | Get-NetIpAddress); $$header='<html><body><H1>Windows Container Web Server</H1>' ;$$callerCountsString='' ;$$callerCounts.Keys | % { $$callerCountsString+='<p>IP {0} callerCount {1} ' -f $$ip[1].IPAddress,$$callerCounts.Item($$_) } ;$$footer='</body></html>' ;$$content='{0}{1}{2}' -f $$header,$$callerCountsString,$$footer ;Write-Output $$content ;$$buffer = [System.Text.Encoding]::UTF8.GetBytes($$content) ;$$response.ContentLength64 = $$buffer.Length ;$$response.OutputStream.Write($$buffer, 0, $$buffer.Length) ;$$response.Close() ;$$responseStatus = $$response.StatusCode ;Write-Host('< {0}' -f $$responseStatus)  } ; "
      nodeSelector:
       kubernetes.io/os: windows
 ```
@@ -177,7 +177,7 @@ tolerations:
 1. 이 파일을 `runtimeClasses.yml` 로 저장한다. 여기에는 윈도우 OS, 아키텍처 및 버전에 적합한 `nodeSelector` 가 포함되었다.
 
 ```yaml
-apiVersion: node.k8s.io/v1beta1
+apiVersion: node.k8s.io/v1
 kind: RuntimeClass
 metadata:
   name: windows-2019

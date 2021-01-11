@@ -13,7 +13,7 @@ disableBrowserError = true
 
 disableKinds = ["taxonomy", "taxonomyTerm"]
 
-ignoreFiles = [ "^OWNERS$", "README[-]+[a-z]*\\.md", "^node_modules$", "content/en/docs/doc-contributor-tools" ]
+ignoreFiles = [ "(?:^|/)OWNERS$", "README[-]+[a-z]*\\.md", "^node_modules$", "content/en/docs/doc-contributor-tools" ]
 
 timeout = 3000
 
@@ -32,6 +32,23 @@ enableGitInfo = true
 # Norwegian ("no") is sometimes but not currently used for testing.
 # Hindi is disabled because it's currently in development.
 disableLanguages = ["hi", "no"]
+
+[caches]
+ [caches.assets]
+  dir = ":cacheDir/_gen"
+  maxAge = -1
+ [caches.getcsv]
+  dir = ":cacheDir/:project"
+  maxAge = "60s"
+ [caches.getjson]
+  dir = ":cacheDir/:project"
+  maxAge = "60s"
+ [caches.images]
+  dir = ":cacheDir/_images"
+  maxAge = -1
+ [caches.modules]
+  dir = ":cacheDir/modules"
+  maxAge = -1
 
 [markup]
  [markup.goldmark]
@@ -65,6 +82,10 @@ date = ["date", ":filename", "publishDate", "lastmod"]
 
 [permalinks]
 blog = "/:section/:year/:month/:day/:slug/"
+
+[sitemap]
+  filename = "sitemap.xml"
+  priority = 0.75
 
 # Be explicit about the output formats. We (currently) only want an RSS feed for the home page.
 [outputs]
@@ -112,25 +133,26 @@ copyright_linux =  "Copyright © 2020 The Linux Foundation ®."
 version_menu = "Versions"
 
 time_format_blog = "Monday, January 02, 2006"
+time_format_default = "January 02, 2006 at 3:04 PM PST"
+
 description = "Production-Grade Container Orchestration"
 showedit = true
 
-latest = "v1.18"
+latest = "v1.20"
 
-fullversion = "v1.18.0"
-version = "v1.18"
+fullversion = "v1.20.0"
+version = "v1.20"
 githubbranch = "master"
 docsbranch = "master"
 deprecated = false
 currentUrl = "https://kubernetes.io/docs/home/"
 nextUrl = "https://kubernetes-io-vnext-staging.netlify.com/"
-githubWebsiteRepo = "github.com/kubernetes/website"
+
+# See codenew shortcode
 githubWebsiteRaw = "raw.githubusercontent.com/kubernetes/website"
 
-# param for displaying an announcement block on every page.
-# See /i18n/en.toml for message text and title.
-announcement = true
-announcement_bg = "#000000" #choose a dark color – text is white
+# GitHub repository link for editing a page and opening issues.
+github_repo = "https://github.com/kubernetes/website"
 
 #Searching
 k8s_search = true
@@ -149,47 +171,47 @@ offlineSearch = false
 [params.pushAssets]
 css = [
   "callouts",
-  "styles",
-  "custom-jekyll/tags"
+  "styles"
 ]
 js = [
   "script"
 ]
 
 [[params.versions]]
-fullversion = "v1.18.0"
-version = "v1.18"
-githubbranch = "v1.18.0"
-docsbranch = "release-1.18"
+fullversion = "v1.20.0"
+version = "v1.20"
+githubbranch = "v1.20.0"
+docsbranch = "master"
 url = "https://kubernetes.io"
 
 [[params.versions]]
-fullversion = "v1.17.4"
+fullversion = "v1.19.4"
+version = "v1.19"
+githubbranch = "v1.19.4"
+docsbranch = "release-1.19"
+url = "https://v1-19.docs.kubernetes.io"
+
+[[params.versions]]
+fullversion = "v1.18.12"
+version = "v1.18"
+githubbranch = "v1.18.12"
+docsbranch = "release-1.18"
+url = "https://v1-18.docs.kubernetes.io"
+
+[[params.versions]]
+fullversion = "v1.17.14"
 version = "v1.17"
-githubbranch = "v1.17.4"
+githubbranch = "v1.17.14"
 docsbranch = "release-1.17"
 url = "https://v1-17.docs.kubernetes.io"
 
 [[params.versions]]
-fullversion = "v1.16.8"
+fullversion = "v1.16.15"
 version = "v1.16"
-githubbranch = "v1.16.8"
+githubbranch = "v1.16.15"
 docsbranch = "release-1.16"
 url = "https://v1-16.docs.kubernetes.io"
 
-[[params.versions]]
-fullversion = "v1.15.11"
-version = "v1.15"
-githubbranch = "v1.15.11"
-docsbranch = "release-1.15"
-url = "https://v1-15.docs.kubernetes.io"
-
-[[params.versions]]
-fullversion = "v1.14.10"
-version = "v1.14"
-githubbranch = "v1.14.10"
-docsbranch = "release-1.14"
-url = "https://v1-14.docs.kubernetes.io"
 
 # User interface configuration
 [params.ui]

@@ -50,7 +50,7 @@ To complete this tutorial, you should already have a basic familiarity with
 ### Additional Minikube setup instructions
 
 {{< caution >}}
-[Minikube](/docs/setup/learning-environment/minikube/) defaults to 1024MiB of memory and 1 CPU.
+[Minikube](https://minikube.sigs.k8s.io/docs/) defaults to 1024MiB of memory and 1 CPU.
 Running Minikube with the default resource configuration results in insufficient resource
 errors during this tutorial. To avoid these errors, start Minikube with the following settings:
 
@@ -243,7 +243,7 @@ This setting is for your safety because your data is more valuable than automati
 
 {{< warning >}}
 Depending on the storage class and reclaim policy, deleting the *PersistentVolumeClaims* may cause the associated volumes
-to also be deleted. Never assume you’ll be able to access data if its volume claims are deleted.
+to also be deleted. Never assume you'll be able to access data if its volume claims are deleted.
 {{< /warning >}}
 
 1. Run the following commands (chained together into a single command) to delete everything in the Cassandra StatefulSet:

@@ -36,7 +36,7 @@ LoadBalancer, or with dynamic PersistentVolumes.
 For both methods you need this infrastructure:
 
 - Three machines that meet [kubeadm's minimum requirements](/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin) for
-  the masters
+  the control-plane nodes
 - Three machines that meet [kubeadm's minimum
   requirements](/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#before-you-begin) for the workers
 - Full network connectivity between all machines in the cluster (public or
@@ -133,10 +133,10 @@ option. Your cluster requirements may need a different configuration.
       ...
       You can now join any number of control-plane node by running the following command on each as a root:
           kubeadm join 192.168.0.200:6443 --token 9vr73a.a8uxyaju799qwdjv --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866 --control-plane --certificate-key f8902e114ef118304e561c3ecd4d0b543adc226b7a07f675f56564185ffe0c07
-      
+
       Please note that the certificate-key gives access to cluster sensitive data, keep it secret!
       As a safeguard, uploaded-certs will be deleted in two hours; If necessary, you can use kubeadm init phase upload-certs to reload certs afterward.
-      
+
       Then you can join any number of worker nodes by running the following on each as root:
           kubeadm join 192.168.0.200:6443 --token 9vr73a.a8uxyaju799qwdjv --discovery-token-ca-cert-hash sha256:7c2e69131a36ae2a042a339b33381c6d0d43887e2de83720eff5359e26aec866
       ```
@@ -155,7 +155,7 @@ option. Your cluster requirements may need a different configuration.
       To generate such a key you can use the following command:
 
       ```sh
-      kubeadm alpha certs certificate-key
+      kubeadm certs certificate-key
       ```
 
     {{< note >}}
@@ -224,7 +224,7 @@ in the kubeadm config file.
     scp /etc/kubernetes/pki/apiserver-etcd-client.key "${CONTROL_PLANE}":
     ```
 
-    - Replace the value of `CONTROL_PLANE` with the `user@host` of the first control plane machine.
+    - Replace the value of `CONTROL_PLANE` with the `user@host` of the first control-plane node.
 
 ### Set up the first control plane node
 
@@ -372,4 +372,3 @@ SSH is required if you want to control all nodes from a single machine.
     # Quote this line if you are using external etcd
     mv /home/${USER}/etcd-ca.key /etc/kubernetes/pki/etcd/ca.key
     ```
-

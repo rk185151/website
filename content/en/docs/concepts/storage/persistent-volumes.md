@@ -174,6 +174,47 @@ spec:
 
 However, the particular path specified in the custom recycler Pod template in the `volumes` part is replaced with the particular path of the volume that is being recycled.
 
+### Reserving a PersistentVolume
+
+The control plane can [bind PersistentVolumeClaims to matching PersistentVolumes](#binding) in the
+cluster. However, if you want a PVC to bind to a specific PV, you need to pre-bind them.
+
+By specifying a PersistentVolume in a PersistentVolumeClaim, you declare a binding between that specific PV and PVC.
+If the PersistentVolume exists and has not reserved PersistentVolumeClaims through its `claimRef` field, then the PersistentVolume and PersistentVolumeClaim will be bound.
+
+The binding happens regardless of some volume matching criteria, including node affinity.
+The control plane still checks that [storage class](/docs/concepts/storage/storage-classes/), access modes, and requested storage size are valid.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: foo-pvc
+  namespace: foo
+spec:
+  storageClassName: "" # Empty string must be explicitly set otherwise default StorageClass will be set
+  volumeName: foo-pv
+  ...
+```
+
+This method does not guarantee any binding privileges to the PersistentVolume. If other PersistentVolumeClaims could use the PV that you specify, you first need to reserve that storage volume. Specify the relevant PersistentVolumeClaim in the `claimRef` field of the PV so that other PVCs can not bind to it.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: foo-pv
+spec:
+  storageClassName: ""
+  claimRef:
+    name: foo-pvc
+    namespace: foo
+  ...
+```
+
+This is useful if you want to consume PersistentVolumes that have their `claimPolicy` set
+to `Retain`, including cases where you are reusing an existing PV.
+
 ### Expanding Persistent Volumes Claims
 
 {{< feature-state for_k8s_version="v1.11" state="beta" >}}
@@ -267,28 +308,37 @@ If expanding underlying storage fails, the cluster administrator can manually re
 
 ## Types of Persistent Volumes
 
-PersistentVolume types are implemented as plugins.  Kubernetes currently supports the following plugins:
+PersistentVolume types are implemented as plugins. Kubernetes currently supports the following plugins:
 
-* GCEPersistentDisk
-* AWSElasticBlockStore
-* AzureFile
-* AzureDisk
-* CSI
-* FC (Fibre Channel)
-* FlexVolume
-* Flocker
-* NFS
-* iSCSI
-* RBD (Ceph Block Device)
-* CephFS
-* Cinder (OpenStack block storage)
-* Glusterfs
-* VsphereVolume
-* Quobyte Volumes
-* HostPath (Single node testing only -- local storage is not supported in any way and WILL NOT WORK in a multi-node cluster)
-* Portworx Volumes
-* ScaleIO Volumes
-* StorageOS
+* [`awsElasticBlockStore`](/docs/concepts/storage/volumes/#awselasticblockstore) - AWS Elastic Block Store (EBS)
+* [`azureDisk`](/docs/concepts/storage/volumes/#azuredisk) - Azure Disk
+* [`azureFile`](/docs/concepts/storage/volumes/#azurefile) - Azure File
+* [`cephfs`](/docs/concepts/storage/volumes/#cephfs) - CephFS volume
+* [`cinder`](/docs/concepts/storage/volumes/#cinder) - Cinder (OpenStack block storage)
+  (**deprecated**)
+* [`csi`](/docs/concepts/storage/volumes/#csi) - Container Storage Interface (CSI)
+* [`fc`](/docs/concepts/storage/volumes/#fc) - Fibre Channel (FC) storage
+* [`flexVolume`](/docs/concepts/storage/volumes/#flexVolume) - FlexVolume
+* [`flocker`](/docs/concepts/storage/volumes/#flocker) - Flocker storage
+* [`gcePersistentDisk`](/docs/concepts/storage/volumes/#gcepersistentdisk) - GCE Persistent Disk
+* [`glusterfs`](/docs/concepts/storage/volumes/#glusterfs) - Glusterfs volume
+* [`hostPath`](/docs/concepts/storage/volumes/#hostpath) - HostPath volume
+  (for single node testing only; WILL NOT WORK in a multi-node cluster;
+  consider using `local` volume instead)
+* [`iscsi`](/docs/concepts/storage/volumes/#iscsi) - iSCSI (SCSI over IP) storage
+* [`local`](/docs/concepts/storage/volumes/#local) - local storage devices
+  mounted on nodes.
+* [`nfs`](/docs/concepts/storage/volumes/#nfs) - Network File System (NFS) storage
+* `photonPersistentDisk` - Photon controller persistent disk.
+  (This volume type no longer works since the removal of the corresponding
+  cloud provider.)
+* [`portworxVolume`](/docs/concepts/storage/volumes/#portworxvolume) - Portworx volume
+* [`quobyte`](/docs/concepts/storage/volumes/#quobyte) - Quobyte volume
+* [`rbd`](/docs/concepts/storage/volumes/#rbd) - Rados Block Device (RBD) volume
+* [`scaleIO`](/docs/concepts/storage/volumes/#scaleio) - ScaleIO volume
+  (**deprecated**)
+* [`storageos`](/docs/concepts/storage/volumes/#storageos) - StorageOS volume
+* [`vsphereVolume`](/docs/concepts/storage/volumes/#vspherevolume) - vSphere VMDK volume
 
 ## Persistent Volumes
 
@@ -682,12 +732,10 @@ Only statically provisioned volumes are supported for alpha release. Administrat
 
 ## Volume Snapshot and Restore Volume from Snapshot Support
 
-{{< feature-state for_k8s_version="v1.17" state="beta" >}}
+{{< feature-state for_k8s_version="v1.20" state="stable" >}}
 
-Volume snapshot feature was added to support CSI Volume Plugins only. For details, see [volume snapshots](/docs/concepts/storage/volume-snapshots/).
-
-To enable support for restoring a volume from a volume snapshot data source, enable the
-`VolumeSnapshotDataSource` feature gate on the apiserver and controller-manager.
+Volume snapshots only support the out-of-tree CSI volume plugins. For details, see [Volume Snapshots](/docs/concepts/storage/volume-snapshots/).
+In-tree volume plugins are deprecated. You can read about the deprecated volume plugins in the [Volume Plugin FAQ](https://github.com/kubernetes/community/blob/master/sig-storage/volume-plugin-faq.md).
 
 ### Create a PersistentVolumeClaim from a Volume Snapshot {#create-persistent-volume-claim-from-volume-snapshot}
 

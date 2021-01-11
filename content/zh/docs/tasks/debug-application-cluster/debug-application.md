@@ -125,7 +125,7 @@ Once your pod has been scheduled, the methods described in [Debug Running Pods](
 
 一旦 Pod 被调度，就可以采用
 [调试运行中的 Pod](/zh/docs/concepts/configuration/manage-resources-containers/)
-中小鞥在的方法来进一步调试。
+中的方法来进一步调试。
 
 <!--
 #### My pod is running but not doing what I told it to do
@@ -150,7 +150,7 @@ The first thing to do is to delete your pod and try creating it again with the `
 For example, run `kubectl apply --validate -f mypod.yaml`.
 If you misspelled `command` as `commnd` then will give an error like this:
 -->
-可以做的第一件事是删除你的 Pod，并尝试才有 `--validate` 选项重新创建。
+可以做的第一件事是删除你的 Pod，并尝试带有 `--validate` 选项重新创建。
 例如，运行 `kubectl apply --validate -f mypod.yaml`。
 如果 `command`  被误拼成 `commnd`，你将会看到下面的错误信息：
 
@@ -315,4 +315,3 @@ You may also visit [troubleshooting document](/docs/troubleshooting/) for more i
 DNS 服务已配置并正常工作，iptables 规则也以安装并且 `kube-proxy` 也没有异常行为。
 
 你也可以访问[故障排查文档](/zh/docs/tasks/debug-application-cluster/troubleshooting/ )来获取更多信息。
-

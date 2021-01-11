@@ -17,9 +17,9 @@ Los revisores harán todo lo posible para proporcionar toda la información nece
 Para obtener más información sobre cómo contribuir a la documentación de Kubernetes, puede consultar:
 
 * [Empezando a contribuir](https://kubernetes.io/docs/contribute/start/)
-* [Visualizando sus cambios en su entorno local](http://kubernetes.io/docs/contribute/intermediate#view-your-changes-locally)
-* [Utilizando las plantillas de las páginas](http://kubernetes.io/docs/contribute/style/page-content-types/)
-* [Guía de estilo de la documentación](http://kubernetes.io/docs/contribute/style/style-guide/)
+* [Visualizando sus cambios en su entorno local](https://kubernetes.io/docs/contribute/intermediate#view-your-changes-locally)
+* [Utilizando las plantillas de las páginas](https://kubernetes.io/docs/contribute/style/page-content-types/)
+* [Guía de estilo de la documentación](https://kubernetes.io/docs/contribute/style/style-guide/)
 * [Traduciendo la documentación de Kubernetes](https://kubernetes.io/docs/contribute/localization/)
 
 ## Levantando el sitio web kubernetes.io en su entorno local con Docker
@@ -33,13 +33,13 @@ El método recomendado para levantar una copia local del sitio web kubernetes.io
 Una vez tenga Docker [configurado en su máquina](https://www.docker.com/get-started), puede construir la imagen de Docker `kubernetes-hugo` localmente ejecutando el siguiente comando en la raíz del repositorio:
 
 ```bash
-make docker-image
+make container-image
 ```
 
 Una vez tenga la imagen construida, puede levantar el sitio web ejecutando:
 
 ```bash
-make docker-serve
+make container-serve
 ```
 
 Abra su navegador y visite http://localhost:1313 para acceder a su copia local del sitio. A medida que vaya haciendo cambios en el código fuente, Hugo irá actualizando la página y forzará la actualización en el navegador.

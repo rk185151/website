@@ -45,8 +45,8 @@ kubectl create namespace qos-example
 
 파드에 Guaranteed QoS 클래스 할당을 위한 전제 조건은 다음과 같다.
 
-* 파드 내 모든 컨테이너는 메모리 상한과 메모리 요청량을 가지고 있어야 하며, 이는 동일해야 한다.
-* 파드 내 모든 컨테이너는 CPU 상한과 CPU 요청량을 가지고 있어야 하며, 이는 동일해야 한다.
+* 파드의 초기화 컨테이너를 포함한 모든 컨테이너는 메모리 상한과 메모리 요청량을 가지고 있어야 하며, 이는 동일해야 한다.
+* 파드의 초기화 컨테이너를 포함한 모든 컨테이너는 CPU 상한과 CPU 요청량을 가지고 있어야 하며, 이는 동일해야 한다.
 
 이것은 하나의 컨테이너를 갖는 파드의 구성 파일이다. 해당 컨테이너는 메모리 상한과
 메모리 요청량을 갖고 있고, 200MiB로 동일하다. 해당 컨테이너는 CPU 상한과 CPU 요청량을 가지며, 700 milliCPU로 동일하다.
@@ -80,7 +80,7 @@ spec:
       requests:
         cpu: 700m
         memory: 200Mi
-  ...
+    ...
 status:
   qosClass: Guaranteed
 ```
@@ -269,4 +269,3 @@ kubectl delete namespace qos-example
 * [API 오브젝트 할당량 구성](/docs/tasks/administer-cluster/quota-api-object/)
 
 * [노드의 토폴로지 관리 정책 제어](/docs/tasks/administer-cluster/topology-manager/)
-

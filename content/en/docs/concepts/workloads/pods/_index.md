@@ -145,7 +145,7 @@ from a _pod template_ and manage those Pods on your behalf.
 
 PodTemplates are specifications for creating Pods, and are included in workload resources such as
 [Deployments](/docs/concepts/workloads/controllers/deployment/),
-[Jobs](/docs/concepts/jobs/run-to-completion-finite-workloads/), and
+[Jobs](/docs/concepts/workloads/controllers/job/), and
 [DaemonSets](/docs/concepts/workloads/controllers/daemonset/).
 
 Each controller for a workload resource uses the `PodTemplate` inside the workload
@@ -172,20 +172,53 @@ spec:
     # The pod template ends here
 ```
 
-Modifying the pod template or switching to a new pod template has no effect on the
-Pods that already exist. Pods do not receive template updates directly. Instead,
-a new Pod is created to match the revised pod template.
+Modifying the pod template or switching to a new pod template has no direct effect
+on the Pods that already exist. If you change the pod template for a workload
+resource, that resource needs to create replacement Pods that use the updated template.
 
-For example, the deployment controller ensures that the running Pods match the current
-pod template for each Deployment object. If the template is updated, the Deployment has
-to remove the existing Pods and create new Pods based on the updated template. Each workload
-resource implements its own rules for handling changes to the Pod template.
+For example, the StatefulSet controller ensures that the running Pods match the current
+pod template for each StatefulSet object. If you edit the StatefulSet to change its pod
+template, the StatefulSet starts to create new Pods based on the updated template.
+Eventually, all of the old Pods are replaced with new Pods, and the update is complete.
+
+Each workload resource implements its own rules for handling changes to the Pod template.
+If you want to read more about StatefulSet specifically, read
+[Update strategy](/docs/tutorials/stateful-application/basic-stateful-set/#updating-statefulsets) in the StatefulSet Basics tutorial.
 
 On Nodes, the {{< glossary_tooltip term_id="kubelet" text="kubelet" >}} does not
 directly observe or manage any of the details around pod templates and updates; those
 details are abstracted away. That abstraction and separation of concerns simplifies
 system semantics, and makes it feasible to extend the cluster's behavior without
 changing existing code.
+
+## Pod update and replacement
+
+As mentioned in the previous section, when the Pod template for a workload
+resource is changed, the controller creates new Pods based on the updated
+template instead of updating or patching the existing Pods.
+
+Kubernetes doesn't prevent you from managing Pods directly. It is possible to
+update some fields of a running Pod, in place. However, Pod update operations
+like 
+[`patch`](/docs/reference/generated/kubernetes-api/{{< param "version" >}}/#patch-pod-v1-core), and
+[`replace`](/docs/reference/generated/kubernetes-api/{{< param "version" >}}/#replace-pod-v1-core)
+have some limitations:
+
+- Most of the metadata about a Pod is immutable. For example, you cannot
+  change the `namespace`, `name`, `uid`, or `creationTimestamp` fields;
+  the `generation` field is unique. It only accepts updates that increment the
+  field's current value.
+- If the `metadata.deletionTimestamp` is set, no new entry can be added to the
+  `metadata.finalizers` list.
+- Pod updates may not change fields other than `spec.containers[*].image`,
+  `spec.initContainers[*].image`, `spec.activeDeadlineSeconds` or
+  `spec.tolerations`. For `spec.tolerations`, you can only add new entries.
+- When updating the `spec.activeDeadlineSeconds` field, two types of updates
+  are allowed:
+
+  1. setting the unassigned field to a positive number; 
+  1. updating the field from a positive number to a smaller, non-negative
+     number.
 
 ## Resource sharing and communication
 
@@ -217,7 +250,7 @@ or POSIX shared memory.  Containers in different Pods have distinct IP addresses
 and can not communicate by IPC without
 [special configuration](/docs/concepts/policy/pod-security-policy/).
 Containers that want to interact with a container running in a different Pod can
-use IP networking to comunicate.
+use IP networking to communicate.
 
 Containers within the Pod see the system hostname as being the same as the configured
 `name` for the Pod. There's more about this in the [networking](/docs/concepts/cluster-administration/networking/)
@@ -253,8 +286,7 @@ but cannot be controlled from there.
 ## {{% heading "whatsnext" %}}
 
 * Learn about the [lifecycle of a Pod](/docs/concepts/workloads/pods/pod-lifecycle/).
-* Learn about [PodPresets](/docs/concepts/workloads/pods/podpreset/).
-* Lean about [RuntimeClass](/docs/concepts/containers/runtime-class/) and how you can use it to
+* Learn about [RuntimeClass](/docs/concepts/containers/runtime-class/) and how you can use it to
   configure different Pods with different container runtime configurations.
 * Read about [Pod topology spread constraints](/docs/concepts/workloads/pods/pod-topology-spread-constraints/).
 * Read about [PodDisruptionBudget](/docs/concepts/workloads/pods/disruptions/) and how you can use it to manage application availability during disruptions.
@@ -264,7 +296,7 @@ but cannot be controlled from there.
 * [The Distributed System Toolkit: Patterns for Composite Containers](https://kubernetes.io/blog/2015/06/the-distributed-system-toolkit-patterns) explains common layouts for Pods with more than one container.
 
 To understand the context for why Kubernetes wraps a common Pod API in other resources (such as {{< glossary_tooltip text="StatefulSets" term_id="statefulset" >}} or {{< glossary_tooltip text="Deployments" term_id="deployment" >}}, you can read about the prior art, including:
-  * [Aurora](http://aurora.apache.org/documentation/latest/reference/configuration/#job-schema)
+  * [Aurora](https://aurora.apache.org/documentation/latest/reference/configuration/#job-schema)
   * [Borg](https://research.google.com/pubs/pub43438.html)
   * [Marathon](https://mesosphere.github.io/marathon/docs/rest-api.html)
   * [Omega](https://research.google/pubs/pub41684/)

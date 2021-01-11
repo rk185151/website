@@ -6,7 +6,6 @@ weight: 20
 
 <!-- overview -->
 
-{{< feature-state for_k8s_version="v1.17" state="beta" >}}
 쿠버네티스에서 스토리지 시스템 볼륨 스냅샷은 _VolumeSnapshot_ 을 나타낸다. 이 문서는 이미 쿠버네티스 [퍼시스턴트 볼륨](/ko/docs/concepts/storage/persistent-volumes/)에 대해 잘 알고 있다고 가정한다.
 
 
@@ -24,11 +23,14 @@ API 리소스 `PersistentVolume` 및 `PersistentVolumeClaim` 가 사용자 및 �
 
 `VolumeSnapshotClass` 을 사용하면 `VolumeSnapshot` 에 속한 다른 속성을 지정할 수 있다. 이러한 속성은 스토리지 시스템에의 동일한 볼륨에서 가져온 스냅샷마다 다를 수 있으므로 `PersistentVolumeClaim` 의 `StorageClass` 를 사용하여 표현할 수는 없다.
 
+볼륨 스냅샷은 쿠버네티스 사용자에게 완전히 새로운 볼륨을 생성하지 않고도 특정 시점에 볼륨의 콘텐츠를 복사하는 표준화된 방법을 제공한다. 예를 들어, 데이터베이스 관리자는 이 기능을 사용하여 수정 사항을 편집 또는 삭제하기 전에 데이터베이스를 백업할 수 있다.
+
 사용자는 이 기능을 사용할 때 다음 사항을 알고 있어야 한다.
 
-* API 객체인 `VolumeSnapshot`, `VolumeSnapshotContent`, `VolumeSnapshotClass` 는 핵심 API가 아닌, {{< glossary_tooltip term_id="CustomResourceDefinition" text="CRDs" >}}이다.
+* API 오브젝트인 `VolumeSnapshot`, `VolumeSnapshotContent`, `VolumeSnapshotClass` 는 핵심 API가 아닌, {{< glossary_tooltip term_id="CustomResourceDefinition" text="CRDs" >}}이다.
 * `VolumeSnapshot` 은 CSI 드라이버에서만 사용할 수 있다.
-* 쿠버네티스 팀은 `VolumeSnapshot` 베타 버젼의 배포 프로세스 일부로써, 컨트롤 플레인에 배포할 스냅샷 컨트롤러와 CSI 드라이버와 함께 배포할 csi-snapshotter라는 사이드카 헬퍼(helper) 컨테이너를 제공한다. 스냅샷 컨트롤러는 `VolumeSnapshot` 및 `VolumeSnapshotContent` 오브젝트를 관찰하고 동적 프로비저닝에서 `VolumeSnapshotContent` 오브젝트의 생성 및 삭제를 할 수 있다.사이드카 csi-snapshotter는 `VolumeSnapshotContent` 오브젝트를 관찰하고 CSI 엔드포인트에 대해 `CreateSnapshot` 및 `DeleteSnapshot` 을 트리거(trigger)한다.
+* 쿠버네티스 팀은 `VolumeSnapshot` 의 배포 프로세스 일부로써, 컨트롤 플레인에 배포할 스냅샷 컨트롤러와 CSI 드라이버와 함께 배포할 csi-snapshotter라는 사이드카 헬퍼(helper) 컨테이너를 제공한다. 스냅샷 컨트롤러는 `VolumeSnapshot` 및 `VolumeSnapshotContent` 오브젝트를 관찰하고 동적 프로비저닝에서 `VolumeSnapshotContent` 오브젝트의 생성 및 삭제를 할 수 있다.사이드카 csi-snapshotter는 `VolumeSnapshotContent` 오브젝트를 관찰하고 CSI 엔드포인트에 대해 `CreateSnapshot` 및 `DeleteSnapshot` 을 트리거(trigger)한다.
+* 스냅샷 오브젝트에 대한 강화된 검증을 제공하는 검증 웹훅 서버도 있다. 이는 CSI 드라이버가 아닌 스냅샷 컨트롤러 및 CRD와 함께 쿠버네티스 배포판에 의해 설치되어야 한다. 스냅샷 기능이 활성화된 모든 쿠버네티스 클러스터에 설치해야 한다.
 * CSI 드라이버에서의 볼륨 스냅샷 기능 유무는 확실하지 않다. 볼륨 스냅샷 서포트를 제공하는 CSI 드라이버는 csi-snapshotter를 사용할 가능성이 높다. 자세한 사항은 [CSI 드라이버 문서](https://kubernetes-csi.github.io/docs/)를 확인하면 된다.
 * CRDs 및 스냅샷 컨트롤러는 쿠버네티스 배포 시 설치된다.
 
@@ -58,7 +60,7 @@ API 리소스 `PersistentVolume` 및 `PersistentVolumeClaim` 가 사용자 및 �
 {{< glossary_tooltip text="퍼시스턴트볼륨클레임" term_id="persistent-volume-claim" >}}
 API 오브젝트가 시스템에서 지워지지 않게 하는 것이다(데이터 손실이 발생할 수 있기 때문에).
 
-퍼시스턴트볼륨클레임이 스냅샷을 생성할 동안에는 해당 퍼시스턴트볼륨클레임은 사용중인 상태이다. 스냅샷 소스로 사용 중인 퍼시스턴트볼륨클레임 API 객체를 삭제한다면, 퍼시스턴트볼륨클레임 객체는 즉시 삭제되지 않는다. 대신, 퍼시스턴트볼륨클레임 객체 삭제는 스냅샷이 준비(readyTouse) 혹은 중단(aborted) 상태가 될 때까지 연기된다.
+퍼시스턴트볼륨클레임이 스냅샷을 생성할 동안에는 해당 퍼시스턴트볼륨클레임은 사용 중인 상태이다. 스냅샷 소스로 사용 중인 퍼시스턴트볼륨클레임 API 오브젝트를 삭제한다면, 퍼시스턴트볼륨클레임 오브젝트는 즉시 삭제되지 않는다. 대신, 퍼시스턴트볼륨클레임 오브젝트 삭제는 스냅샷이 준비(readyToUse) 혹은 중단(aborted) 상태가 될 때까지 연기된다.
 
 ### 삭제
 
@@ -69,7 +71,7 @@ API 오브젝트가 시스템에서 지워지지 않게 하는 것이다(데이�
 각각의 볼륨 스냅샷은 스펙과 상태를 포함한다.
 
 ```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
 metadata:
   name: new-snapshot-test
@@ -87,14 +89,14 @@ spec:
 
 사전 프로비저닝된 스냅샷의 경우, 다음 예와 같이 `volumeSnapshotContentName`을 스냅샷 소스로 지정해야 한다. 사전 프로비저닝된 스냅샷에는 `volumeSnapshotContentName` 소스 필드가 필요하다.
 
-```
-apiVersion: snapshot.storage.k8s.io/v1beta1
+```yaml
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshot
 metadata:
   name: test-snapshot
 spec:
   source:
-        volumeSnapshotContentName: test-content
+    volumeSnapshotContentName: test-content
 ```
 
 ## 볼륨 스냅샷 컨텐츠
@@ -123,7 +125,7 @@ spec:
 사전 프로비저닝된 스냅샷의 경우, (클러스터 관리자로서) 다음과 같이 `VolumeSnapshotContent` 오브젝트를 작성해야 한다.
 
 ```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotContent
 metadata:
   name: new-snapshot-content-test

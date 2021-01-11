@@ -11,8 +11,6 @@ weight: 65
 
 Windows applications constitute a large portion of the services and applications that run in many organizations. [Windows containers](https://aka.ms/windowscontainers) provide a modern way to encapsulate processes and package dependencies, making it easier to use DevOps practices and follow cloud native patterns for Windows applications. Kubernetes has become the defacto standard container orchestrator, and the release of Kubernetes 1.14 includes production support for scheduling Windows containers on Windows nodes in a Kubernetes cluster, enabling a vast ecosystem of Windows applications to leverage the power of Kubernetes. Organizations with investments in Windows-based applications and Linux-based applications don't have to look for separate orchestrators to manage their workloads, leading to increased operational efficiencies across their deployments, regardless of operating system.
 
-
-
 <!-- body -->
 
 ## Windows containers in Kubernetes
@@ -33,17 +31,20 @@ In this document, when we talk about Windows containers we mean Windows containe
 
 ### Supported Functionality
 
-#### Compute
+#### Windows OS Version Support
 
-From an API and kubectl perspective, Windows containers behave in much the same way as Linux-based containers. However, there are some notable differences in key functionality which are outlined in the limitation section.
+Refer to the following table for Windows operating system support in Kubernetes. A single heterogeneous Kubernetes cluster can have both Windows and Linux worker nodes. Windows containers have to be scheduled on Windows nodes and Linux containers on Linux nodes.
 
-Let's start with the operating system version. Refer to the following table for Windows operating system support in Kubernetes. A single heterogeneous Kubernetes cluster can have both Windows and Linux worker nodes. Windows containers have to be scheduled on Windows nodes and Linux containers on Linux nodes.
-
-| Kubernetes version | Host OS version (Kubernetes Node) | | |
+| Kubernetes version | Windows Server LTSC releases | Windows Server SAC releases |
 | --- | --- | --- | --- |
-| | *Windows Server 1709* | *Windows Server 1803* | *Windows Server 1809/Windows Server 2019* |
-| *Kubernetes v1.14* | Not Supported | Not Supported| Supported for Windows Server containers Builds 17763.* with Docker EE-basic 18.09 |
+| *Kubernetes v1.17* | Windows Server 2019 | Windows Server ver 1809 |
+| *Kubernetes v1.18* | Windows Server 2019 | Windows Server ver 1809, Windows Server ver 1903, Windows Server ver 1909 |
+| *Kubernetes v1.19* | Windows Server 2019 | Windows Server ver 1909, Windows Server ver 2004 |
+| *Kubernetes v1.20* | Windows Server 2019 | Windows Server ver 1909, Windows Server ver 2004 |
 
+{{< note >}}
+Information on the different Windows Server servicing channels including their support models can be found at [Windows Server servicing channels](https://docs.microsoft.com/en-us/windows-server/get-started-19/servicing-channels-19).
+{{< /note >}}
 {{< note >}}
 We don't expect all Windows customers to update the operating system for their apps frequently. Upgrading your applications is what dictates and necessitates upgrading or introducing new nodes to the cluster. For the customers that chose to upgrade their operating system for containers running on Kubernetes, we will offer guidance and step-by-step instructions when we add support for a new operating system version. This guidance will include recommended upgrade procedures for upgrading user applications together with cluster nodes. Windows nodes adhere to Kubernetes [version-skew policy](/docs/setup/release/version-skew-policy/) (node to control plane versioning) the same way as Linux nodes do today.
 {{< /note >}}
@@ -53,6 +54,14 @@ The Windows Server Host Operating System is subject to the [Windows Server ](htt
 {{< note >}}
 Windows containers with process isolation have strict compatibility rules, [where the host OS version must match the container base image OS version](https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility). Once we support Windows containers with Hyper-V isolation in Kubernetes, the limitation and compatibility rules will change.
 {{< /note >}}
+
+#### Pause Image
+
+Microsoft maintains a Windows pause infrastructure container at `mcr.microsoft.com/oss/kubernetes/pause:1.4.1`.
+
+#### Compute
+
+From an API and kubectl perspective, Windows containers behave in much the same way as Linux-based containers. However, there are some notable differences in key functionality which are outlined in the [limitation section](#limitations).
 
 Key Kubernetes elements work the same way in Windows as they do in Linux. In this section, we talk about some of the key workload enablers and how they map to Windows.
 
@@ -104,21 +113,18 @@ Pods, Controllers and Services are critical elements to managing Windows workloa
 
 {{< feature-state for_k8s_version="v1.14" state="stable" >}}
 
-Docker EE-basic 18.09+ is the recommended container runtime for Windows Server 2019 / 1809 nodes running Kubernetes. This works with the dockershim code included in the kubelet.
+Docker EE-basic 19.03+ is the recommended container runtime for all Windows Server versions. This works with the dockershim code included in the kubelet.
 
 ##### CRI-ContainerD
 
-{{< feature-state for_k8s_version="v1.18" state="alpha" >}}
+{{< feature-state for_k8s_version="v1.20" state="stable" >}}
 
-ContainerD is an OCI-compliant runtime that works with Kubernetes on Linux. Kubernetes v1.18 adds support for {{< glossary_tooltip term_id="containerd" text="ContainerD" >}} on Windows. Progress for ContainerD on Windows can be tracked at [enhancements#1001](https://github.com/kubernetes/enhancements/issues/1001).
+{{< glossary_tooltip term_id="containerd" text="ContainerD" >}} 1.4.0+ can also be used as the container runtime for Windows Kubernetes nodes.
+
+Learn how to [install ContainerD on a Windows](/docs/setup/production-environment/container-runtimes/#install-containerd).
 
 {{< caution >}}
-
-ContainerD on Windows in Kubernetes v1.18 has the following known shortcomings:
-
-* ContainerD does not have an official release with support for Windows; all development in Kubernetes has been performed against active ContainerD development branches. Production deployments should always use official releases that have been fully tested and are supported with security fixes.
-* Group-Managed Service Accounts are not implemented when using ContainerD - see [containerd/cri#1276](https://github.com/containerd/cri/issues/1276).
-
+There is a [known limitation](/docs/tasks/configure-pod-container/configure-gmsa/#gmsa-limitations) when using GMSA with ContainerD to access Windows network shares which requires a kernel patch. Updates to address this limitation are currently available for Windows Server, Version 2004 and will be available for Windows Server 2019 in early 2021. Check for updates on the [Microsoft Windows Containers issue tracker](https://github.com/microsoft/Windows-Containers/issues/44).
 {{< /caution >}}
 
 #### Persistent Storage
@@ -126,6 +132,7 @@ ContainerD on Windows in Kubernetes v1.18 has the following known shortcomings:
 Kubernetes [volumes](/docs/concepts/storage/volumes/) enable complex applications, with data persistence and Pod volume sharing requirements, to be deployed on Kubernetes. Management of persistent volumes associated with a specific storage back-end or protocol includes actions such as: provisioning/de-provisioning/resizing of volumes, attaching/detaching a volume to/from a Kubernetes node and mounting/dismounting a volume to/from individual containers in a pod that needs to persist data. The code implementing these volume management actions for a specific storage back-end or protocol is shipped in the form of a Kubernetes volume [plugin](/docs/concepts/storage/volumes/#types-of-volumes). The following broad classes of Kubernetes volume plugins are supported on Windows:
 
 ##### In-tree Volume Plugins
+
 Code associated with in-tree volume plugins ship as part of the core Kubernetes code base. Deployment of in-tree volume plugins do not require installation of additional scripts or deployment of separate containerized plugin components. These plugins can handle: provisioning/de-provisioning and resizing of volumes in the storage backend, attaching/detaching of volumes to/from a Kubernetes node and mounting/dismounting a volume to/from individual containers in a pod. The following in-tree plugins support Windows nodes:
 
 * [awsElasticBlockStore](/docs/concepts/storage/volumes/#awselasticblockstore)
@@ -135,6 +142,7 @@ Code associated with in-tree volume plugins ship as part of the core Kubernetes 
 * [vsphereVolume](/docs/concepts/storage/volumes/#vspherevolume)
 
 ##### FlexVolume Plugins
+
 Code associated with [FlexVolume](/docs/concepts/storage/volumes/#flexVolume) plugins ship as out-of-tree scripts or binaries that need to be deployed directly on the host. FlexVolume plugins handle attaching/detaching of volumes to/from a Kubernetes node and mounting/dismounting a volume to/from individual containers in a pod. Provisioning/De-provisioning of persistent volumes associated with FlexVolume plugins may be handled through an external provisioner that is typically separate from the FlexVolume plugins. The following FlexVolume [plugins](https://github.com/Microsoft/K8s-Storage-Plugins/tree/master/flexvolume/windows), deployed as powershell scripts on the host, support Windows nodes:
 
 * [SMB](https://github.com/microsoft/K8s-Storage-Plugins/tree/master/flexvolume/windows/plugins/microsoft.com~smb.cmd)
@@ -142,7 +150,7 @@ Code associated with [FlexVolume](/docs/concepts/storage/volumes/#flexVolume) pl
 
 ##### CSI Plugins
 
-{{< feature-state for_k8s_version="v1.16" state="alpha" >}}
+{{< feature-state for_k8s_version="v1.19" state="beta" >}}
 
 Code associated with {{< glossary_tooltip text="CSI" term_id="csi" >}} plugins ship as out-of-tree scripts and binaries that are typically distributed as container images and deployed using standard Kubernetes constructs like DaemonSets and StatefulSets. CSI plugins handle a wide range of volume management actions in Kubernetes: provisioning/de-provisioning/resizing of volumes, attaching/detaching of volumes to/from a Kubernetes node and mounting/dismounting a volume to/from individual containers in a pod, backup/restore of persistent data using snapshots and cloning. CSI plugins typically consist of node plugins (that run on each node as a DaemonSet) and controller plugins.
 
@@ -164,11 +172,13 @@ The following service spec types are supported:
 * LoadBalancer
 * ExternalName
 
+##### Network modes
+
 Windows supports five different networking drivers/modes: L2bridge, L2tunnel, Overlay, Transparent, and NAT. In a heterogeneous cluster with Windows and Linux worker nodes, you need to select a networking solution that is compatible on both Windows and Linux. The following out-of-tree plugins are supported on Windows, with recommendations on when to use each CNI:
 
 | Network Driver | Description | Container Packet Modifications | Network Plugins | Network Plugin Characteristics |
 | -------------- | ----------- | ------------------------------ | --------------- | ------------------------------ |
-| L2bridge       | Containers are attached to an external vSwitch. Containers are attached to the underlay network, although the physical network doesn't need to learn the container MACs because they are rewritten on ingress/egress. Inter-container traffic is bridged inside the container host. | MAC is rewritten to host MAC, IP remains the same. | [win-bridge](https://github.com/containernetworking/plugins/tree/master/plugins/main/windows/win-bridge), [Azure-CNI](https://github.com/Azure/azure-container-networking/blob/master/docs/cni.md), Flannel host-gateway uses win-bridge | win-bridge uses L2bridge network mode, connects containers to the underlay of hosts, offering best performance. Requires user-defined routes (UDR) for inter-node connectivity. |
+| L2bridge       | Containers are attached to an external vSwitch. Containers are attached to the underlay network, although the physical network doesn't need to learn the container MACs because they are rewritten on ingress/egress. | MAC is rewritten to host MAC, IP may be rewritten to host IP using HNS OutboundNAT policy. | [win-bridge](https://github.com/containernetworking/plugins/tree/master/plugins/main/windows/win-bridge), [Azure-CNI](https://github.com/Azure/azure-container-networking/blob/master/docs/cni.md), Flannel host-gateway uses win-bridge | win-bridge uses L2bridge network mode, connects containers to the underlay of hosts, offering best performance. Requires user-defined routes (UDR) for inter-node connectivity. |
 | L2Tunnel | This is a special case of l2bridge, but only used on Azure. All packets are sent to the virtualization host where SDN policy is applied. | MAC rewritten, IP visible on the underlay network | [Azure-CNI](https://github.com/Azure/azure-container-networking/blob/master/docs/cni.md) | Azure-CNI allows integration of containers with Azure vNET, and allows them to leverage the set of capabilities that [Azure Virtual Network provides](https://azure.microsoft.com/en-us/services/virtual-network/). For example, securely connect to Azure services or use Azure NSGs. See [azure-cni for some examples](https://docs.microsoft.com/en-us/azure/aks/concepts-network#azure-cni-advanced-networking) |
 | Overlay (Overlay networking for Windows in Kubernetes is in *alpha* stage) | Containers are given a vNIC connected to an external vSwitch. Each overlay network gets its own IP subnet, defined by a custom IP prefix.The overlay network driver uses VXLAN encapsulation. | Encapsulated with an outer header. | [Win-overlay](https://github.com/containernetworking/plugins/tree/master/plugins/main/windows/win-overlay), Flannel VXLAN (uses win-overlay) | win-overlay should be used when virtual container networks are desired to be isolated from underlay of hosts (e.g. for security reasons). Allows for IPs to be re-used for different overlay networks (which have different VNID tags)  if you are restricted on IPs in your datacenter.  This option requires [KB4489899](https://support.microsoft.com/help/4489899) on Windows Server 2019. |
 | Transparent (special use case for [ovn-kubernetes](https://github.com/openvswitch/ovn-kubernetes)) | Requires an external vSwitch. Containers are attached to an external vSwitch which enables intra-pod communication via logical networks (logical switches and routers). | Packet is encapsulated either via [GENEVE](https://datatracker.ietf.org/doc/draft-gross-geneve/) or [STT](https://datatracker.ietf.org/doc/draft-davie-stt/) tunneling to reach pods which are not on the same host.  <br/> Packets are forwarded or dropped via the tunnel metadata information supplied by the ovn network controller. <br/> NAT is done for north-south communication. | [ovn-kubernetes](https://github.com/openvswitch/ovn-kubernetes) | [Deploy via ansible](https://github.com/openvswitch/ovn-kubernetes/tree/master/contrib). Distributed ACLs can be applied via Kubernetes policies. IPAM support. Load-balancing can be achieved without kube-proxy. NATing is done without using iptables/netsh. |
@@ -188,11 +198,38 @@ For the node, pod, and service objects, the following network flows are supporte
 * Node -> Pod
 * Pod -> Node
 
+##### IP address management (IPAM) {#ipam}
+
 The following IPAM options are supported on Windows:
 
 * [Host-local](https://github.com/containernetworking/plugins/tree/master/plugins/ipam/host-local)
 * HNS IPAM (Inbox platform IPAM, this is a fallback when no IPAM is set)
 * [Azure-vnet-ipam](https://github.com/Azure/azure-container-networking/blob/master/docs/ipam.md) (for azure-cni only)
+
+##### Load balancing and Services
+
+On Windows, you can use the following settings to configure Services and load balancing behavior:
+
+{{< table caption="Windows Service Settings" >}}
+| Feature | Description | Supported Kubernetes version  | Supported Windows OS build | How to enable |
+| ------- | ----------- | ----------------------------- | -------------------------- | ------------- |
+| Session affinity | Ensures that connections from a particular client are passed to the same Pod each time. | v1.19+ | [Windows Server vNext Insider Preview Build 19551](https://blogs.windows.com/windowsexperience/2020/01/28/announcing-windows-server-vnext-insider-preview-build-19551/) (or higher) | Set `service.spec.sessionAffinity` to "ClientIP" |
+| Direct Server Return | Load balancing mode where the IP address fixups and the LBNAT occurs at the container vSwitch port directly; service traffic arrives with the source IP set as the originating pod IP. Promises lower latency and scalability. | v1.15+ | Windows Server, version 2004 | Set the following flags in kube-proxy: `--feature-gates="WinDSR=true" --enable-dsr=true` |
+| Preserve-Destination | Skips DNAT of service traffic, thereby preserving the virtual IP of the target service in packets reaching the backend Pod. This setting will also ensure that the client IP of incoming packets get preserved. | v1.15+ | Windows Server, version 1903 (or higher) | Set `"preserve-destination": "true"` in service annotations and enable DSR flags in kube-proxy. |
+| IPv4/IPv6 dual-stack networking | Native IPv4-to-IPv4 in parallel with IPv6-to-IPv6 communications to, from, and within a cluster | v1.19+ | Windows Server vNext Insider Preview Build 19603 (or higher) | See [IPv4/IPv6 dual-stack](#ipv4ipv6-dual-stack) |
+{{< /table >}}
+
+#### IPv4/IPv6 dual-stack
+
+You can enable IPv4/IPv6 dual-stack networking for `l2bridge` networks using the `IPv6DualStack` [feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/). See [enable IPv4/IPv6 dual stack](/docs/concepts/services-networking/dual-stack#enable-ipv4ipv6-dual-stack) for more details.
+
+{{< note >}}
+On Windows, using IPv6 with Kubernetes require Windows Server, version 2004 (kernel version 10.0.19041.610) or later.
+{{< /note >}}
+
+{{< note >}}
+Overlay (VXLAN) networks on Windows do not support dual-stack networking today.
+{{< /note >}}
 
 ### Limitations
 
@@ -200,7 +237,7 @@ The following IPAM options are supported on Windows:
 
 Windows is only supported as a worker node in the Kubernetes architecture and component matrix. This means that a Kubernetes cluster must always include Linux master nodes, zero or more Linux worker nodes, and zero or more Windows worker nodes.
 
-#### Compute
+#### Compute {compute-limitations}
 
 ##### Resource management and process isolation
 
@@ -212,7 +249,7 @@ Windows has strict compatibility rules, where the host OS version must match the
 
 ##### Feature Restrictions
 
-* TerminationGracePeriod: not implemented
+* TerminationGracePeriod: requires CRI-containerD
 * Single file mapping: to be implemented with CRI-ContainerD
 * Termination message: to be implemented with CRI-ContainerD
 * Privileged Containers: not currently supported in Windows containers
@@ -236,12 +273,13 @@ The behavior of the flags behave differently as described below:
 * MemoryPressure Condition is not implemented
 * There are no OOM eviction actions taken by the kubelet
 * Kubelet running on the windows node does not have memory restrictions. `--kubelet-reserve` and `--system-reserve` do not set limits on kubelet or processes running on the host. This means kubelet or a process on the host could cause memory resource starvation outside the node-allocatable and scheduler
+* An additional flag to set the priority of the kubelet process is availabe on the Windows nodes called `--windows-priorityclass`. This flag allows kubelet process to get more CPU time slices when compared to other processes running on the Windows host. More information on the allowable values and their meaning is available at [Windows Priority Classes](https://docs.microsoft.com/en-us/windows/win32/procthread/scheduling-priorities#priority-class). In order for kubelet to always have enough CPU cycles it is recommended to set this flag to `ABOVE_NORMAL_PRIORITY_CLASS` and above
 
 #### Storage
 
 Windows has a layered filesystem driver to mount container layers and create a copy filesystem based on NTFS. All file paths in the container are resolved only within the context of that container.
 
-* Volume mounts can only target a directory in the container, and not an individual file
+* With Docker Volume mounts can only target a directory in the container, and not an individual file. This limitation does not exist with CRI-containerD.
 * Volume mounts cannot project files or directories back to the host filesystem
 * Read-only filesystems are not supported because write access is always required for the Windows registry and SAM database. However, read-only volumes are supported
 * Volume user-masks and permissions are not available. Because the SAM is not shared between the host & container, there's no mapping between them. All permissions are resolved within the context of the container
@@ -259,7 +297,7 @@ As a result, the following storage functionality is not supported on Windows nod
 * NFS based storage/volume support
 * Expanding the mounted volume (resizefs)
 
-#### Networking
+#### Networking {networking-limitations}
 
 Windows Container Networking differs in some important ways from Linux networking. The [Microsoft documentation for Windows Container Networking](https://docs.microsoft.com/en-us/virtualization/windowscontainers/container-networking/architecture) contains additional details and background.
 
@@ -288,7 +326,7 @@ These features were added in Kubernetes v1.15:
 * Windows reference network plugins win-bridge and win-overlay do not currently implement [CNI spec](https://github.com/containernetworking/cni/blob/master/SPEC.md) v0.4.0 due to missing "CHECK" implementation.
 * The Flannel VXLAN CNI has the following limitations on Windows:
 
-1. Node-pod connectivity isn't possible by design. It's only possible for local pods with Flannel [PR 1096](https://github.com/coreos/flannel/pull/1096)
+1. Node-pod connectivity isn't possible by design. It's only possible for local pods with Flannel v0.12.0 (or higher).
 2. We are restricted to using VNI 4096 and UDP port 4789. The VNI limitation is being worked on and will be overcome in a future release (open-source flannel changes). See the official [Flannel VXLAN](https://github.com/coreos/flannel/blob/master/Documentation/backends.md#vxlan) backend docs for more details on these parameters.
 
 ##### DNS {#dns-limitations}
@@ -297,6 +335,14 @@ These features were added in Kubernetes v1.15:
 * On Linux, you have a DNS suffix list, which is used when trying to resolve PQDNs. On Windows, we only have 1 DNS suffix, which is the DNS suffix associated with that pod's namespace (mydns.svc.cluster.local for example). Windows can resolve FQDNs and services or names resolvable with just that suffix. For example, a pod spawned in the default namespace, will have the DNS suffix **default.svc.cluster.local**. On a Windows pod, you can resolve both **kubernetes.default.svc.cluster.local** and **kubernetes**, but not the in-betweens, like **kubernetes.default** or **kubernetes.default.svc**.
 * On Windows, there are multiple DNS resolvers that can be used. As these come with slightly different behaviors, using the `Resolve-DNSName` utility for name query resolutions is recommended.
 
+##### IPv6
+
+Kubernetes on Windows does not support single-stack "IPv6-only" networking. However,dual-stack IPv4/IPv6 networking for pods and nodes with single-family services is supported. See [IPv4/IPv6 dual-stack networking](#ipv4ipv6-dual-stack) for more details.
+
+##### Session affinity
+
+Setting the maximum session sticky time for Windows services using `service.spec.sessionAffinityConfig.clientIP.timeoutSeconds` is not supported.
+
 ##### Security
 
 Secrets are written in clear text on the node's volume (as compared to tmpfs/in-memory on linux). This means customers have to do two things
@@ -304,7 +350,7 @@ Secrets are written in clear text on the node's volume (as compared to tmpfs/in-
 1. Use file ACLs to secure the secrets file location
 2. Use volume-level encryption using [BitLocker](https://docs.microsoft.com/en-us/windows/security/information-protection/bitlocker/bitlocker-how-to-deploy-on-windows-server)
 
-[RunAsUser ](/docs/concepts/policy/pod-security-policy/#users-and-groups)is not currently supported on Windows. The workaround is to create local accounts before packaging the container. The RunAsUsername capability may be added in a future release.
+[RunAsUsername](/docs/tasks/configure-pod-container/configure-runasusername) can be specified for Windows Pod's or Container's to execute the Container processes as a node-default user. This is roughly equivalent to [RunAsUser](/docs/concepts/policy/pod-security-policy/#users-and-groups).
 
 Linux specific pod security context privileges such as SELinux, AppArmor, Seccomp, Capabilities (POSIX Capabilities), and others are not supported.
 
@@ -417,6 +463,7 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
         ```
 
         If the above referenced script is not suitable, you can manually configure nssm.exe using the following examples.
+
         ```powershell
         # Register flanneld.exe
         nssm install flanneld C:\flannel\flanneld.exe
@@ -426,9 +473,9 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
         nssm start flanneld
 
         # Register kubelet.exe
-        # Microsoft releases the pause infrastructure container at mcr.microsoft.com/k8s/core/pause:1.2.0
+        # Microsoft releases the pause infrastructure container at mcr.microsoft.com/oss/kubernetes/pause:1.4.1
         nssm install kubelet C:\k\kubelet.exe
-        nssm set kubelet AppParameters --hostname-override=<hostname> --v=6 --pod-infra-container-image=mcr.microsoft.com/k8s/core/pause:1.2.0 --resolv-conf="" --allow-privileged=true --enable-debugging-handlers --cluster-dns=<DNS-service-IP> --cluster-domain=cluster.local --kubeconfig=c:\k\config --hairpin-mode=promiscuous-bridge --image-pull-progress-deadline=20m --cgroups-per-qos=false  --log-dir=<log directory> --logtostderr=false --enforce-node-allocatable="" --network-plugin=cni --cni-bin-dir=c:\k\cni --cni-conf-dir=c:\k\cni\config
+        nssm set kubelet AppParameters --hostname-override=<hostname> --v=6 --pod-infra-container-image=mcr.microsoft.com/oss/kubernetes/pause:1.4.1 --resolv-conf="" --allow-privileged=true --enable-debugging-handlers --cluster-dns=<DNS-service-IP> --cluster-domain=cluster.local --kubeconfig=c:\k\config --hairpin-mode=promiscuous-bridge --image-pull-progress-deadline=20m --cgroups-per-qos=false  --log-dir=<log directory> --logtostderr=false --enforce-node-allocatable="" --network-plugin=cni --cni-bin-dir=c:\k\cni --cni-conf-dir=c:\k\cni\config
         nssm set kubelet AppDirectory C:\k
         nssm start kubelet
 
@@ -447,7 +494,6 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
         nssm set kube-proxy DependOnService kubelet
         nssm start kube-proxy
         ```
-
 
         For initial troubleshooting, you can use the following flags in [nssm.exe](https://nssm.cc/) to redirect stdout and stderr to a output file:
 
@@ -510,7 +556,7 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
 
 1. My Windows Pods cannot launch because of missing `/run/flannel/subnet.env`
 
-    This indicates that Flannel didn't launch correctly. You can either try to restart flanneld.exe or you can copy the files over manually from `/run/flannel/subnet.env` on the Kubernetes master to` C:\run\flannel\subnet.env` on the Windows worker node and modify the `FLANNEL_SUBNET` row to a different number. For example, if node subnet 10.244.4.1/24 is desired:
+    This indicates that Flannel didn't launch correctly. You can either try to restart flanneld.exe or you can copy the files over manually from `/run/flannel/subnet.env` on the Kubernetes master to `C:\run\flannel\subnet.env` on the Windows worker node and modify the `FLANNEL_SUBNET` row to a different number. For example, if node subnet 10.244.4.1/24 is desired:
 
     ```env
     FLANNEL_NETWORK=10.244.0.0/16
@@ -532,13 +578,11 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
     Get-NetAdapter | ? Name -Like "vEthernet (Ethernet*"
     ```
 
-    Often it is worthwhile to modify the [InterfaceName](https://github.com/microsoft/SDN/blob/master/Kubernetes/flannel/start.ps1#L6) parameter of the start.ps1 script, in cases where the host's network adapter isn't "Ethernet". Otherwise, consult the output of the `start-kubelet.ps1` script to see if there are errors during virtual network creation.
+    Often it is worthwhile to modify the [InterfaceName](https://github.com/microsoft/SDN/blob/master/Kubernetes/flannel/start.ps1#L7) parameter of the start.ps1 script, in cases where the host's network adapter isn't "Ethernet". Otherwise, consult the output of the `start-kubelet.ps1` script to see if there are errors during virtual network creation.
 
 1. My Pods are stuck at "Container Creating" or restarting over and over
 
     Check that your pause image is compatible with your OS version. The [instructions](https://docs.microsoft.com/en-us/virtualization/windowscontainers/kubernetes/deploying-resources) assume that both the OS and the containers are version 1803. If you have a later version of Windows, such as an Insider build, you need to adjust the images accordingly. Please refer to the Microsoft's [Docker repository](https://hub.docker.com/u/microsoft/) for images. Regardless, both the pause image Dockerfile and the sample service expect the image to be tagged as :latest.
-
-    Starting with Kubernetes v1.14, Microsoft releases the pause infrastructure container at `mcr.microsoft.com/k8s/core/pause:1.2.0`.
 
 1. DNS resolution is not properly working
 
@@ -546,8 +590,8 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
 
 1. `kubectl port-forward` fails with "unable to do port forwarding: wincat not found"
 
-    This was implemented in Kubernetes 1.15, and the pause infrastructure container `mcr.microsoft.com/k8s/core/pause:1.2.0`. Be sure to use these versions or newer ones.
-    If you would like to build your own pause infrastructure container, be sure to include [wincat](https://github.com/kubernetes-sigs/sig-windows-tools/tree/master/cmd/wincat)
+    This was implemented in Kubernetes 1.15 by including wincat.exe in the pause infrastructure container `mcr.microsoft.com/oss/kubernetes/pause:1.4.1`. Be sure to use these versions or newer ones.
+    If you would like to build your own pause infrastructure container be sure to include [wincat](https://github.com/kubernetes-sigs/sig-windows-tools/tree/master/cmd/wincat).
 
 1. My Kubernetes installation is failing because my Windows Server node is behind a proxy
 
@@ -562,7 +606,7 @@ Your main source of help for troubleshooting your Kubernetes cluster should star
 
     In a Kubernetes Pod, an infrastructure or "pause" container is first created to host the container endpoint. Containers that belong to the same pod, including infrastructure and worker containers, share a common network namespace and endpoint (same IP and port space). Pause containers are needed to accommodate worker containers crashing or restarting without losing any of the networking configuration.
 
-    The "pause" (infrastructure) image is hosted on Microsoft Container Registry (MCR). You can access it using `docker pull mcr.microsoft.com/k8s/core/pause:1.2.0`. For more details, see the [DOCKERFILE](https://github.com/kubernetes-sigs/sig-windows-tools/tree/master/cmd/wincat).
+    The "pause" (infrastructure) image is hosted on Microsoft Container Registry (MCR). You can access it using `mcr.microsoft.com/oss/kubernetes/pause:1.4.1`. For more details, see the [DOCKERFILE](https://github.com/kubernetes-sigs/windows-testing/blob/master/images/pause/Dockerfile).
 
 ### Further investigation
 
@@ -584,10 +628,7 @@ If filing a bug, please include detailed information about how to reproduce the 
 * [Relevant logs](https://github.com/kubernetes/community/blob/master/sig-windows/CONTRIBUTING.md#gathering-logs)
 * Tag the issue sig/windows by commenting on the issue with `/sig windows` to bring it to a SIG-Windows member's attention
 
-
-
 ## {{% heading "whatsnext" %}}
-
 
 We have a lot of features in our roadmap. An abbreviated high level list is included below, but we encourage you to view our [roadmap project](https://github.com/orgs/kubernetes/projects/8) and help us make Windows support better by [contributing](https://github.com/kubernetes/community/blob/master/sig-windows/).
 
@@ -600,31 +641,7 @@ Hyper-V isolation is requried to enable the following use cases for Windows cont
 * Specific CPU/NUMA settings for a pod
 * Memory isolation and reservations
 
-The existing Hyper-V isolation support, an experimental feature as of v1.10, will be deprecated in the future in favor of the CRI-ContainerD and RuntimeClass features mentioned above. To use the current features and create a Hyper-V isolated container, the kubelet should be started with feature gates `HyperVContainer=true` and the Pod should include the annotation `experimental.windows.kubernetes.io/isolation-type=hyperv`. In the experiemental release, this feature is limited to 1 container per Pod.
-
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: iis
-spec:
-  selector:
-    matchLabels:
-      app: iis
-  replicas: 3
-  template:
-    metadata:
-      labels:
-        app: iis
-      annotations:
-        experimental.windows.kubernetes.io/isolation-type: hyperv
-    spec:
-      containers:
-      - name: iis
-        image: microsoft/iis
-        ports:
-        - containerPort: 80
-```
+Hyper-V isolation support will be added in a later release and will require CRI-Containerd.
 
 ### Deployment with kubeadm and cluster API
 
@@ -633,10 +650,3 @@ cluster. Windows node support in kubeadm is currently a work-in-progress but a
 guide is available [here](/docs/tasks/administer-cluster/kubeadm/adding-windows-nodes/).
 We are also making investments in cluster API to ensure Windows nodes are
 properly provisioned.
-
-### A few other key features
-* Beta support for Group Managed Service Accounts
-* More CNIs
-* More Storage Plugins
-
-

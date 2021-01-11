@@ -10,14 +10,12 @@ content_type: concept
 
 Tutaj znajdziesz dokumentację źródłową Kubernetes.
 
-
-
 <!-- body -->
 
 ## Dokumentacja API
 
-* [Kubernetes API Overview](/docs/reference/using-api/api-overview/) - Ogólne informacje na temat Kubernetes API.
-  * [Dokumentacja źródłowa Kubernetes API {{< latest-version >}}](/docs/reference/generated/kubernetes-api/{{< latest-version >}}/)
+* [Dokumentacja źródłowa API Kubernetesa {{< latest-version >}}](/docs/reference/generated/kubernetes-api/{{< latest-version >}}/)
+* [Using The Kubernetes API](/docs/reference/using-api/) - ogólne informacje na temat API Kubernetesa.
 
 ## Biblioteki klientów API
 
@@ -44,7 +42,7 @@ biblioteki to:
 * [kube-proxy](/docs/reference/command-line-tools-reference/kube-proxy/) - Przekazuje bezpośrednio dane przepływające w transmisji TCP/UDP lub dystrybuuje ruch TCP/UDP zgodnie ze schematem *round-robin* pomiędzy usługi back-endu.
 * [kube-scheduler](/docs/reference/command-line-tools-reference/kube-scheduler/) - Scheduler odpowiada za dostępność, wydajność i zasoby.
 * [kube-scheduler Policies](/docs/reference/scheduling/policies)
-* [kube-scheduler Profiles](/docs/reference/scheduling/profiles)
+* [kube-scheduler Profiles](/docs/reference/scheduling/config#profiles)
 
 ## Dokumentacja projektowa
 

@@ -82,6 +82,7 @@ You can list this and any other serviceAccount resources in the namespace with t
 ```shell
 kubectl get serviceaccounts
 ```
+
 The output is similar to this:
 
 ```
@@ -108,9 +109,10 @@ If you get a complete dump of the service account object, like this:
 ```shell
 kubectl get serviceaccounts/build-robot -o yaml
 ```
+
 The output is similar to this:
 
-```
+```yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -164,6 +166,7 @@ Any tokens for non-existent service accounts will be cleaned up by the token con
 ```shell
 kubectl describe secrets/build-robot-secret
 ```
+
 The output is similar to this:
 
 ```
@@ -227,7 +230,7 @@ kubectl get serviceaccounts default -o yaml > ./sa.yaml
 
 The output of the `sa.yaml` file is similar to this:
 
-```shell
+```yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -244,7 +247,7 @@ Using your editor of choice (for example `vi`), open the `sa.yaml` file, delete 
 
 The output of the `sa.yaml` file is similar to this:
 
-```shell
+```yaml
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -286,15 +289,16 @@ TODO: Test and explain how to use additional non-K8s secrets with an existing se
 
 ## Service Account Token Volume Projection
 
-{{< feature-state for_k8s_version="v1.12" state="beta" >}}
+{{< feature-state for_k8s_version="v1.20" state="stable" >}}
 
 {{< note >}}
-This ServiceAccountTokenVolumeProjection is __beta__ in 1.12 and
-enabled by passing all of the following flags to the API server:
+To enable and use token request projection, you must specify each of the following
+command line arguments to `kube-apiserver`:
 
 * `--service-account-issuer`
+* `--service-account-key-file`
 * `--service-account-signing-key-file`
-* `--service-account-api-audiences`
+* `--api-audiences`
 
 {{< /note >}}
 
@@ -318,13 +322,14 @@ kubectl create -f https://k8s.io/examples/pods/pod-projected-svc-token.yaml
 ```
 
 The kubelet will request and store the token on behalf of the pod, make the
-token available to the pod at a configurable file path, and refresh the token as it approaches expiration. Kubelet proactively rotates the token if it is older than 80% of its total TTL, or if the token is older than 24 hours.
+token available to the pod at a configurable file path, and refresh the token as it approaches expiration.
+The kubelet proactively rotates the token if it is older than 80% of its total TTL, or if the token is older than 24 hours.
 
 The application is responsible for reloading the token when it rotates. Periodic reloading (e.g. once every 5 minutes) is sufficient for most use cases.
 
 ## Service Account Issuer Discovery
 
-{{< feature-state for_k8s_version="v1.18" state="alpha" >}}
+{{< feature-state for_k8s_version="v1.20" state="beta" >}}
 
 The Service Account Issuer Discovery feature is enabled by enabling the
 `ServiceAccountIssuerDiscovery` [feature gate](/docs/reference/command-line-tools-reference/feature-gates)
@@ -379,11 +384,8 @@ JWKS URI is required to use the `https` scheme.
 
 ## {{% heading "whatsnext" %}}
 
-
 See also:
 
 - [Cluster Admin Guide to Service Accounts](/docs/reference/access-authn-authz/service-accounts-admin/)
 - [Service Account Signing Key Retrieval KEP](https://github.com/kubernetes/enhancements/blob/master/keps/sig-auth/20190730-oidc-discovery.md)
 - [OIDC Discovery Spec](https://openid.net/specs/openid-connect-discovery-1_0.html)
-
-

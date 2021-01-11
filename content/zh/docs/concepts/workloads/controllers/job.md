@@ -5,7 +5,7 @@ feature:
   title: 批量执行
   description: >
     除了服务之外，Kubernetes 还可以管理你的批处理和 CI 工作负载，在期望时替换掉失效的容器。
-weight: 60
+weight: 50
 ---
 <!--
 reviewers:
@@ -17,7 +17,7 @@ feature:
   title: Batch execution
   description: >
     In addition to services, Kubernetes can manage your batch and CI workloads, replacing containers that fail, if desired.
-weight: 60
+weight: 50
 -->
 
 <!-- overview -->
@@ -731,7 +731,7 @@ kubectl get job old -o yaml
 
 输出类似于：
 
-```
+```yaml
 kind: Job
 metadata:
   name: old
@@ -758,7 +758,7 @@ the selector that the system normally generates for you automatically.
 你需要在新 Job 中设置 `manualSelector: true`，因为你并未使用系统通常自动为你
 生成的选择算符。 
 
-```
+```yaml
 kind: Job
 metadata:
   name: new

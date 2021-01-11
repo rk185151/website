@@ -69,17 +69,7 @@ spec:
 ## 넘어가기 전에: 내장 노드 레이블들 {#built-in-node-labels}
 
 [붙인](#1-단계-노드에-레이블-붙이기) 레이블뿐만 아니라, 노드에는
-표준 레이블 셋이 미리 채워져 있다. 이 레이블들은 다음과 같다.
-
-* [`kubernetes.io/hostname`](/docs/reference/kubernetes-api/labels-annotations-taints/#kubernetes-io-hostname)
-* [`failure-domain.beta.kubernetes.io/zone`](/docs/reference/kubernetes-api/labels-annotations-taints/#failure-domainbetakubernetesiozone)
-* [`failure-domain.beta.kubernetes.io/region`](/docs/reference/kubernetes-api/labels-annotations-taints/#failure-domainbetakubernetesioregion)
-* [`topology.kubernetes.io/zone`](/docs/reference/kubernetes-api/labels-annotations-taints/#topologykubernetesiozone)
-* [`topology.kubernetes.io/region`](/docs/reference/kubernetes-api/labels-annotations-taints/#topologykubernetesiozone)
-* [`beta.kubernetes.io/instance-type`](/docs/reference/kubernetes-api/labels-annotations-taints/#beta-kubernetes-io-instance-type)
-* [`node.kubernetes.io/instance-type`](/docs/reference/kubernetes-api/labels-annotations-taints/#nodekubernetesioinstance-type)
-* [`kubernetes.io/os`](/docs/reference/kubernetes-api/labels-annotations-taints/#kubernetes-io-os)
-* [`kubernetes.io/arch`](/docs/reference/kubernetes-api/labels-annotations-taints/#kubernetes-io-arch)
+표준 레이블 셋이 미리 채워져 있다. 이들 목록은 [잘 알려진 레이블, 어노테이션 및 테인트](/docs/reference/kubernetes-api/labels-annotations-taints/)를 참고한다.
 
 {{< note >}}
 이 레이블들의 값은 클라우드 공급자에 따라 다르고 신뢰성이 보장되지 않는다.
@@ -164,6 +154,49 @@ spec:
 
 `preferredDuringSchedulingIgnoredDuringExecution` 의 `weight` 필드의 범위는 1-100이다. 모든 스케줄링 요구 사항 (리소스 요청, RequiredDuringScheduling 어피니티 표현식 등)을 만족하는 각 노드들에 대해 스케줄러는 이 필드의 요소들을 반복해서 합계를 계산하고 노드가 MatchExpressions 에 일치하는 경우 합계에 "가중치(weight)"를 추가한다. 이후에 이 점수는 노드에 대한 다른 우선순위 함수의 점수와 합쳐진다. 전체 점수가 가장 높은 노드를 가장 선호한다.
 
+#### 스케줄링 프로파일당 노드 어피니티
+
+{{< feature-state for_k8s_version="v1.20" state="beta" >}}
+
+여러 [스케줄링 프로파일](/ko/docs/reference/scheduling/config/#여러-프로파일)을 구성할 때 
+노드 어피니티가 있는 프로파일을 연결할 수 있는데, 이는 프로파일이 특정 노드 집합에만 적용되는 경우 유용하다.
+이렇게 하려면 [스케줄러 구성](/ko/docs/reference/scheduling/config/)에 있는 
+[`NodeAffinity` 플러그인](/ko/docs/reference/scheduling/config/#스케줄링-플러그인-1)의 인수에 `addedAffinity`를 추가한다. 예를 들면
+
+```yaml
+apiVersion: kubescheduler.config.k8s.io/v1beta1
+kind: KubeSchedulerConfiguration
+
+profiles:
+  - schedulerName: default-scheduler
+  - schedulerName: foo-scheduler
+    pluginConfig:
+      - name: NodeAffinity
+        args:
+          addedAffinity:
+            requiredDuringSchedulingIgnoredDuringExecution:
+              nodeSelectorTerms:
+              - matchExpressions:
+                - key: scheduler-profile
+                  operator: In
+                  values:
+                  - foo
+```
+
+`addedAffinity`는 `.spec.schedulerName`을 `foo-scheduler`로 설정하는 모든 파드에 적용되며 
+PodSpec에 지정된 NodeAffinity도 적용된다.
+즉, 파드를 매칭시키려면, 노드가 `addedAffinity`와 파드의 `.spec.NodeAffinity`를 충족해야 한다.
+
+`addedAffinity`는 엔드 유저에게 표시되지 않으므로, 예상치 못한 동작이 일어날 수 있다. 프로파일의 
+스케줄러 이름과 명확한 상관 관계가 있는 노드 레이블을 사용하는 것이 좋다.
+
+{{< note >}}
+[데몬셋용 파드를 생성](/ko/docs/concepts/workloads/controllers/daemonset/#기본-스케줄러로-스케줄)하는 데몬셋 컨트롤러는 
+스케줄링 프로파일을 인식하지 못한다.
+따라서 `addedAffinity`없이 `default-scheduler`와 같은 스케줄러 프로파일을 유지하는 것이 좋다. 그런 다음 데몬셋의 파드 템플릿이 스케줄러 이름을 사용해야 한다.
+그렇지 않으면, 데몬셋 컨트롤러에 의해 생성된 일부 파드가 스케줄되지 않은 상태로 유지될 수 있다.
+{{< /note >}}
+
 ### 파드간 어피니티와 안티-어피니티
 
 파드간 어피니티와 안티-어피니티를 사용하면 노드의 레이블을 기반으로 하지 않고, *노드에서 이미 실행 중인 파드 레이블을 기반으로*
@@ -206,8 +239,8 @@ spec:
 `preferredDuringSchedulingIgnoredDuringExecution` 이다. 파드 어피니티 규칙에 의하면 키 "security" 와 값
 "S1"인 레이블이 있는 하나 이상의 이미 실행 중인 파드와 동일한 영역에 있는 경우에만 파드를 노드에 스케줄할 수 있다.
 (보다 정확하게는, 클러스터에 키 "security"와 값 "S1"인 레이블을 가지고 있는 실행 중인 파드가 있는 키
-`failure-domain.beta.kubernetes.io/zone` 와 값 V인 노드가 최소 하나 이상 있고,
-노드 N이 키 `failure-domain.beta.kubernetes.io/zone` 와
+`topology.kubernetes.io/zone` 와 값 V인 노드가 최소 하나 이상 있고,
+노드 N이 키 `topology.kubernetes.io/zone` 와
 일부 값이 V인 레이블을 가진다면 파드는 노드 N에서 실행할 수 있다.)
 파드 안티-어피니티 규칙에 의하면 파드는 키 "security"와 값 "S2"인 레이블을 가진 파드와
 동일한 영역의 노드에 스케줄되지 않는다.
@@ -396,3 +429,5 @@ spec:
 파드가 노드에 할당되면 kubelet은 파드를 실행하고 노드의 로컬 리소스를 할당한다.
 [토폴로지 매니저](/docs/tasks/administer-cluster/topology-manager/)는
 노드 수준의 리소스 할당 결정에 참여할 수 있다.
+
+

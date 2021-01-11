@@ -89,7 +89,7 @@ volumeBindingMode: Immediate
 등에 대한 완전한 재량권을 가진다. [kubernetes-sigs/sig-storage-lib-external-provisioner](https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner)
 리포지터리에는 대량의 사양을 구현하는 외부 프로비저너를 작성하기
 위한 라이브러리가 있다. 일부 외부 프로비저너의 목록은
-[kubernetes-incubator/external-storage](https://github.com/kubernetes-incubator/external-storage) 리포지터리에 있다.
+[kubernetes-sigs/sig-storage-lib-external-provisioner](https://github.com/kubernetes-sigs/sig-storage-lib-external-provisioner) 리포지터리에 있다.
 
 예를 들어, NFS는 내부 프로비저너를 제공하지 않지만, 외부
 프로비저너를 사용할 수 있다. 타사 스토리지 업체가 자체 외부
@@ -410,6 +410,21 @@ parameters:
 
 ### vSphere
 
+vSphere 스토리지 클래스에는 두 가지 유형의 프로비저닝 도구가 있다.
+
+- [CSI 프로비저닝 도구](#csi-프로비저닝-도구): `csi.vsphere.vmware.com`
+- [vCP 프로비저닝 도구](#vcp-프로비저닝-도구): `kubernetes.io/vsphere-volume`
+
+인-트리 프로비저닝 도구는 [사용 중단](/blog/2019/12/09/kubernetes-1-17-feature-csi-migration-beta/#why-are-we-migrating-in-tree-plugins-to-csi)되었다. CSI 프로비저닝 도구에 대한 자세한 내용은 [쿠버네티스 vSphere CSI 드라이버](https://vsphere-csi-driver.sigs.k8s.io/) 및 [vSphereVolume CSI 마이그레이션](/ko/docs/concepts/storage/volumes/#csi-마이그레이션)을 참고한다.
+
+#### CSI 프로비저닝 도구 {#vsphere-provisioner-csi}
+
+vSphere CSI 스토리지클래스 프로비저닝 도구는 Tanzu 쿠버네티스 클러스터에서 작동한다. 예시는 [vSphere CSI 리포지터리](https://raw.githubusercontent.com/kubernetes-sigs/vsphere-csi-driver/master/example/vanilla-k8s-file-driver/example-sc.yaml)를 참조한다.
+
+#### vCP 프로비저닝 도구
+
+다음 예시에서는 VMware 클라우드 공급자(vCP) 스토리지클래스 프로비저닝 도구를 사용한다.
+
 1. 사용자 지정 디스크 형식으로 스토리지클래스를 생성한다.
 
     ```yaml
@@ -575,7 +590,7 @@ parameters:
   이 Quobyte 테넌트는 이미 Quobyte에 있어야 한다.
   기본값은 "DEFAULT".
 
-### Azure 디스크크
+### Azure 디스크
 
 #### Azure 비관리 디스크 스토리지 클래스 {#azure-unmanaged-disk-storage-class}
 

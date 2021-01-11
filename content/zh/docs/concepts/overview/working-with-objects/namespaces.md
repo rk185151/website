@@ -47,12 +47,8 @@ resource can only be in one namespace.
 
 <!--
 Namespaces are a way to divide cluster resources between multiple users (via [resource quota](/docs/concepts/policy/resource-quotas/)).
-
-In future versions of Kubernetes, objects in the same namespace will have the same
-access control policies by default.
 -->
 名字空间是在多个用户之间划分集群资源的一种方法（通过[资源配额](/zh/docs/concepts/policy/resource-quotas/)）。
-在 Kubernetes 未来版本中，相同名字空间中的对象默认将具有相同的访问控制策略。
 
 <!--
 It is not necessary to use multiple namespaces just to separate slightly different
@@ -108,14 +104,14 @@ Kubernetes starts with four initial namespaces:
 * `kube-public` This namespace is created automatically and is readable by all users (including those not authenticated). This namespace is mostly reserved for cluster usage, in case that some resources should be visible and readable publicly throughout the whole cluster. The public aspect of this namespace is only a convention, not a requirement.
 * `kube-node-lease` This namespace for the lease objects associated with each node which improves the performance of the node heartbeats as the cluster scales.
 -->
-Kubernetes 会创建三个初始名字空间：
+Kubernetes 会创建四个初始名字空间：
 
 * `default` 没有指明使用其它名字空间的对象所使用的默认名字空间
 * `kube-system` Kubernetes 系统创建对象所使用的名字空间
 * `kube-public` 这个名字空间是自动创建的，所有用户（包括未经过身份验证的用户）都可以读取它。
   这个名字空间主要用于集群使用，以防某些资源在整个集群中应该是可见和可读的。
   这个名字空间的公共方面只是一种约定，而不是要求。
-* `kube-node-lease` 此名字空间用于与哥哥节点相关的租期（Lease）对象；
+* `kube-node-lease` 此名字空间用于与各个节点相关的租期（Lease）对象；
   此对象的设计使得集群规模很大时节点心跳检测性能得到提升。
 
 <!--

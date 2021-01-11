@@ -40,7 +40,7 @@ of a class when first creating VolumeSnapshotClass objects, and the objects cann
 be updated once they are created.
 
 ```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
   name: csi-hostpath-snapclass
@@ -54,7 +54,7 @@ that don't request any particular class to bind to by adding the
 `snapshot.storage.kubernetes.io/is-default-class: "true"` annotation:
 
 ```yaml
-apiVersion: snapshot.storage.k8s.io/v1beta1
+apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
 metadata:
   name: csi-hostpath-snapclass
@@ -72,7 +72,7 @@ used for provisioning VolumeSnapshots. This field must be specified.
 
 ### DeletionPolicy
 
-Volume snapshot classes have a deletionPolicy. It enables you to configure what happens to a VolumeSnapshotContent when the VolumeSnapshot object it is bound to is to be deleted. The deletionPolicy of a volume snapshot can either be `Retain` or `Delete`. This field must be specified.
+Volume snapshot classes have a deletionPolicy. It enables you to configure what happens to a VolumeSnapshotContent when the VolumeSnapshot object it is bound to is to be deleted. The deletionPolicy of a volume snapshot class can either be `Retain` or `Delete`. This field must be specified.
 
 If the deletionPolicy is `Delete`, then the underlying storage snapshot will be deleted along with the VolumeSnapshotContent object. If the deletionPolicy is `Retain`, then both the underlying snapshot and VolumeSnapshotContent remain.
 

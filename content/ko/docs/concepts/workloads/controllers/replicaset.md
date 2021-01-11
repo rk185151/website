@@ -1,7 +1,7 @@
 ---
 title: 레플리카셋
 content_type: concept
-weight: 10
+weight: 20
 ---
 
 <!-- overview -->
@@ -229,7 +229,7 @@ API 버전에 대해서는 `frontend.yaml` 예제의 첫 번째 줄을 참고한
 
 ### 파드 템플릿
 
-`.spec.template`은 레이블을 붙이도록 되어있는 [파드 템플릿](/ko/docs/concepts/workloads/pods/pod-overview/#파드-템플릿)이다.
+`.spec.template`은 레이블을 붙이도록 되어있는 [파드 템플릿](/ko/docs/concepts/workloads/pods/#파드-템플릿)이다.
 우리는 `frontend.yaml` 예제에서 `tier: frontend`이라는 레이블을 하나 가지고 있다.
 이 파드를 다른 컨트롤러가 취하지 않도록 다른 컨트롤러의 셀렉터와 겹치지 않도록 주의해야 한다.
 
@@ -241,9 +241,10 @@ API 버전에 대해서는 `frontend.yaml` 예제의 첫 번째 줄을 참고한
 `.spec.selector` 필드는 [레이블 셀렉터](/ko/docs/concepts/overview/working-with-objects/labels/)이다.
 [앞서](#레플리카-셋의-작동-방식) 논의한 것처럼 이 레이블은 소유될 가능성이 있는 파드를 식별하는데 사용된다.
 우리 `frontend.yaml` 예제에서의 셀렉터는 다음과 같다.
-```shell
+
+```yaml
 matchLabels:
-	tier: frontend
+  tier: frontend
 ```
 
 레플리카셋에서 `.spec.template.metadata.labels`는 `spec.selector`과 일치해야 하며

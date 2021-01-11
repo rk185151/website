@@ -12,7 +12,7 @@ API from various programming languages.
 
 
 <!-- body -->
-To write applications using the [Kubernetes REST API](/docs/reference/using-api/api-overview/),
+To write applications using the [Kubernetes REST API](/docs/reference/using-api/),
 you do not need to implement the API calls and request/response types yourself.
 You can use a client library for the programming language you are using.
 
@@ -40,6 +40,8 @@ The following client libraries are officially maintained by
 
 ## Community-maintained client libraries
 
+{{% thirdparty-content %}}
+
 The following Kubernetes API client libraries are provided and maintained by
 their authors, not the Kubernetes team.
 
@@ -60,6 +62,7 @@ their authors, not the Kubernetes team.
 | PHP                  | [github.com/allansun/kubernetes-php-client](https://github.com/allansun/kubernetes-php-client) |
 | PHP                  | [github.com/maclof/kubernetes-client](https://github.com/maclof/kubernetes-client) |
 | PHP                  | [github.com/travisghansen/kubernetes-client-php](https://github.com/travisghansen/kubernetes-client-php) |
+| PHP                  | [github.com/renoki-co/php-k8s](https://github.com/renoki-co/php-k8s) |
 | Python               | [github.com/eldarion-gondor/pykube](https://github.com/eldarion-gondor/pykube) |
 | Python               | [github.com/fiaas/k8s](https://github.com/fiaas/k8s) |
 | Python               | [github.com/mnubo/kubernetes-py](https://github.com/mnubo/kubernetes-py) |
@@ -71,6 +74,7 @@ their authors, not the Kubernetes team.
 | Rust                 | [github.com/ynqa/kubernetes-rust](https://github.com/ynqa/kubernetes-rust) |
 | Scala                | [github.com/doriordan/skuber](https://github.com/doriordan/skuber) |
 | Scala                | [github.com/joan38/kubernetes-client](https://github.com/joan38/kubernetes-client) |
+| Swift                | [github.com/swiftkube/client](https://github.com/swiftkube/client) |
 | DotNet               | [github.com/tonnyeremin/kubernetes_gen](https://github.com/tonnyeremin/kubernetes_gen) |
 | DotNet (RestSharp)   | [github.com/masroorhasan/Kubernetes.DotNet](https://github.com/masroorhasan/Kubernetes.DotNet) |
 | Elixir               | [github.com/obmarg/kazan](https://github.com/obmarg/kazan/) |

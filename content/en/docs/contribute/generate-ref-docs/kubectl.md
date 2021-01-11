@@ -127,7 +127,7 @@ Monitor your cherry-pick pull request until it is merged into the release branch
 
 {{< note >}}
 Proposing a cherry pick requires that you have permission to set a label and a
-milestone in your pull request. If you don’t have those permissions, you will
+milestone in your pull request. If you don't have those permissions, you will
 need to work with someone who can set the label and milestone for you.
 {{< /note >}}
 
@@ -230,11 +230,9 @@ Build the Kubernetes documentation in your local `<web-base>`.
 
 ```shell
 cd <web-base>
-make docker-serve
+git submodule update --init --recursive --depth 1 # if not already done
+make container-serve
 ```
-{{< note >}}
-The use of `make docker-serve` is deprecated. Please use `make container-serve` instead.
-{{< /note >}}
 
 View the [local preview](https://localhost:1313/docs/reference/generated/kubectl/kubectl-commands/).
 

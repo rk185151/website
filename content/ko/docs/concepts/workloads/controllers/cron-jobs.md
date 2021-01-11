@@ -28,8 +28,6 @@ kube-controller-manager 컨테이너에 설정된 시간대는
 11자를 자동으로 추가하고, 작업 이름의 최대 길이는
 63자라는 제약 조건이 있기 때문이다.
 
-
-
 <!-- body -->
 
 ## 크론잡
@@ -44,7 +42,7 @@ kube-controller-manager 컨테이너에 설정된 시간대는
 
 {{< codenew file="application/job/cronjob.yaml" >}}
 
-([크론잡으로 자동화된 작업 실행하기](/docs/tasks/job/automated-tasks-with-cron-jobs/)는
+([크론잡으로 자동화된 작업 실행하기](/ko/docs/tasks/job/automated-tasks-with-cron-jobs/)는
 이 예시를 더 자세히 설명한다.)
 
 ## 크론잡의 한계 {#cron-job-limitations}
@@ -78,6 +76,14 @@ Cannot determine if job needs to be started. Too many missed start time (> 100).
 크론잡은 오직 그 일정에 맞는 잡 생성에 책임이 있고,
 잡은 그 잡이 대표하는 파드 관리에 책임이 있다.
 
+## 새 컨트롤러
+
+쿠버네티스 1.20부터 알파 기능으로 사용할 수 있는 크론잡 컨트롤러의 대체 구현이 있다. 크론잡 컨트롤러의 버전 2를 선택하려면, 다음의 [기능 게이트](/ko/docs/reference/command-line-tools-reference/feature-gates/) 플래그를 {{< glossary_tooltip term_id="kube-controller-manager" text="kube-controller-manager" >}}에 전달한다.
+
+```
+--feature-gates="CronJobControllerV2=true"
+```
+
 
 ## {{% heading "whatsnext" %}}
 
@@ -85,4 +91,4 @@ Cannot determine if job needs to be started. Too many missed start time (> 100).
 크론잡 `schedule` 필드의 포맷을 문서화 한다.
 
 크론잡 생성과 작업에 대한 지침과 크론잡 매니페스트의
-예는 [크론잡으로 자동화된 작업 실행하기](/docs/tasks/job/automated-tasks-with-cron-jobs/)를 참조한다.
+예는 [크론잡으로 자동화된 작업 실행하기](/ko/docs/tasks/job/automated-tasks-with-cron-jobs/)를 참조한다.

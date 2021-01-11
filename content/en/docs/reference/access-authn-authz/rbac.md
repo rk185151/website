@@ -514,13 +514,22 @@ subjects:
   namespace: kube-system
 ```
 
-For all service accounts in the "qa" namespace:
+For all service accounts in the "qa" group in any namespace:
 
 ```yaml
 subjects:
 - kind: Group
   name: system:serviceaccounts:qa
   apiGroup: rbac.authorization.k8s.io
+```
+For all service accounts in the "dev" group in the "development" namespace:
+
+```yaml
+subjects:
+- kind: Group
+  name: system:serviceaccounts:dev
+  apiGroup: rbac.authorization.k8s.io
+  namespace: development
 ```
 
 For all service accounts in any namespace:
@@ -801,7 +810,12 @@ This is commonly used by add-on API servers for unified authentication and autho
 <td>None</td>
 <td>Allows access to the resources required by most <a href="/docs/concepts/storage/persistent-volumes/#provisioner">dynamic volume provisioners</a>.</td>
 </tr>
-<tbody>
+<tr>
+<td><b>system:monitoring</b></td>
+<td><b>system:monitoring</b> group</td>
+<td>Allows read access to control-plane monitoring endpoints (i.e. {{< glossary_tooltip term_id="kube-apiserver" text="kube-apiserver" >}} liveness and readiness endpoints (<tt>/healthz</tt>, <tt>/livez</tt>, <tt>/readyz</tt>), the individual health-check endpoints (<tt>/healthz/*</tt>, <tt>/livez/*</tt>, <tt>/readyz/*</tt>),  and <tt>/metrics</tt>). Note that individual health check endpoints and the metric endpoint may expose sensitive information.</td>
+</tr>
+</tbody>
 </table>
 
 ### Roles for built-in controllers {#controller-roles}
@@ -891,6 +905,7 @@ rules:
 - apiGroups: ["rbac.authorization.k8s.io"]
   resources: ["clusterroles"]
   verbs: ["bind"]
+  # omit resourceNames to allow binding any ClusterRole
   resourceNames: ["admin","edit","view"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1095,37 +1110,37 @@ In order from most secure to least secure, the approaches are:
 
 2. Grant a role to the "default" service account in a namespace
 
-If an application does not specify a `serviceAccountName`, it uses the "default" service account.
+    If an application does not specify a `serviceAccountName`, it uses the "default" service account.
 
-{{< note >}}
-Permissions given to the "default" service account are available to any pod
-in the namespace that does not specify a `serviceAccountName`.
-{{< /note >}}
+    {{< note >}}
+    Permissions given to the "default" service account are available to any pod
+    in the namespace that does not specify a `serviceAccountName`.
+    {{< /note >}}
 
-For example, grant read-only permission within "my-namespace" to the "default" service account:
+    For example, grant read-only permission within "my-namespace" to the "default" service account:
 
-```shell
-kubectl create rolebinding default-view \
-  --clusterrole=view \
-  --serviceaccount=my-namespace:default \
-  --namespace=my-namespace
-```
+    ```shell
+    kubectl create rolebinding default-view \
+      --clusterrole=view \
+      --serviceaccount=my-namespace:default \
+      --namespace=my-namespace
+    ```
 
-Many [add-ons](/docs/concepts/cluster-administration/addons/) run as the
-"default" service account in the `kube-system` namespace.
-To allow those add-ons to run with super-user access, grant cluster-admin
-permissions to the "default" service account in the `kube-system` namespace.
+    Many [add-ons](/docs/concepts/cluster-administration/addons/) run as the
+    "default" service account in the `kube-system` namespace.
+    To allow those add-ons to run with super-user access, grant cluster-admin
+    permissions to the "default" service account in the `kube-system` namespace.
 
-{{< caution >}}
-Enabling this means the `kube-system` namespace contains Secrets
-that grant super-user access to your cluster's API.
-{{< /caution >}}
+    {{< caution >}}
+    Enabling this means the `kube-system` namespace contains Secrets
+    that grant super-user access to your cluster's API.
+    {{< /caution >}}
 
-```shell
-kubectl create clusterrolebinding add-on-cluster-admin \
-  --clusterrole=cluster-admin \
-  --serviceaccount=kube-system:default
-```
+    ```shell
+    kubectl create clusterrolebinding add-on-cluster-admin \
+      --clusterrole=cluster-admin \
+      --serviceaccount=kube-system:default
+    ```
 
 3. Grant a role to all service accounts in a namespace
 
@@ -1192,7 +1207,7 @@ the [legacy ABAC policy](/docs/reference/access-authn-authz/abac/#policy-file-fo
 ```
 
 To explain that first command line option in detail: if earlier authorizers, such as Node,
-deny a request, then the the RBAC authorizer attempts to authorize the API request. If RBAC
+deny a request, then the RBAC authorizer attempts to authorize the API request. If RBAC
 also denies that API request, the ABAC authorizer is then run. This means that any request
 allowed by *either* the RBAC or ABAC policies is allowed.
 
