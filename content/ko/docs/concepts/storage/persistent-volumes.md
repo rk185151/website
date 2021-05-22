@@ -1,4 +1,10 @@
 ---
+
+
+
+
+
+
 title: 퍼시스턴트 볼륨
 feature:
   title: 스토리지 오케스트레이션
@@ -23,7 +29,7 @@ _퍼시스턴트볼륨_ (PV)은 관리자가 프로비저닝하거나 [스토리
 
 _퍼시스턴트볼륨클레임_ (PVC)은 사용자의 스토리지에 대한 요청이다. 파드와 비슷하다. 파드는 노드 리소스를 사용하고 PVC는 PV 리소스를 사용한다. 파드는 특정 수준의 리소스(CPU 및 메모리)를 요청할 수 있다. 클레임은 특정 크기 및 접근 모드를 요청할 수 있다(예: ReadWriteOnce, ReadOnlyMany 또는 ReadWriteMany로 마운트 할 수 있음. [AccessModes](#접근-모드) 참고).
 
-퍼시스턴트볼륨클레임을 사용하면 사용자가 추상화된 스토리지 리소스를 사용할 수 있지만, 다른 문제들 때문에 성능과 같은 다양한 속성을 가진 퍼시스턴트볼륨이 필요한 경우가 일반적이다. 클러스터 관리자는 사용자에게 해당 볼륨의 구현 방법에 대한 세부 정보를 제공하지 않고 단순히 크기와 접근 모드와는 다른 방식으로 다양한 퍼시스턴트볼륨을 제공할 수 있어야 한다. 이러한 요구에는 _스토리지클래스_ 리소스가 있다.
+퍼시스턴트볼륨클레임을 사용하면 사용자가 추상화된 스토리지 리소스를 사용할 수 있지만, 다른 문제들 때문에 성능과 같은 다양한 속성을 가진 퍼시스턴트볼륨이 필요한 경우가 일반적이다. 클러스터 관리자는 사용자에게 해당 볼륨의 구현 방법에 대한 세부 정보를 제공하지 않고 크기와 접근 모드와는 다른 방식으로 다양한 퍼시스턴트볼륨을 제공할 수 있어야 한다. 이러한 요구에는 _스토리지클래스_ 리소스가 있다.
 
 [실습 예제와 함께 상세한 내용](/ko/docs/tasks/configure-pod-container/configure-persistent-volume-storage/)을 참고하길 바란다.
 
@@ -225,7 +231,7 @@ spec:
 * Azure Disk
 * Portworx
 * FlexVolumes
-* CSI
+* {{< glossary_tooltip text="CSI" term_id="csi" >}}
 
 스토리지 클래스의 `allowVolumeExpansion` 필드가 true로 설정된 경우에만 PVC를 확장할 수 있다.
 
@@ -317,14 +323,14 @@ EBS 볼륨 확장은 시간이 많이 걸리는 작업이다. 또한 6시간마�
 * [`gcePersistentDisk`](/ko/docs/concepts/storage/volumes/#gcepersistentdisk) - GCE Persistent Disk
 * [`glusterfs`](/ko/docs/concepts/storage/volumes/#glusterfs) - Glusterfs 볼륨
 * [`hostPath`](/ko/docs/concepts/storage/volumes/#hostpath) - HostPath 볼륨
-  (단일 노드 테스트 전용. 다중-노드 클러스터에서 작동하지 않음. 
+  (단일 노드 테스트 전용. 다중-노드 클러스터에서 작동하지 않음.
   대신 `로컬` 볼륨 사용 고려)
 * [`iscsi`](/ko/docs/concepts/storage/volumes/#iscsi) - iSCSI (SCSI over IP) 스토리지
-* [`local`](/ko/docs/concepts/storage/volumes/#local) - 노드에 마운트된 
+* [`local`](/ko/docs/concepts/storage/volumes/#local) - 노드에 마운트된
   로컬 스토리지 디바이스
 * [`nfs`](/ko/docs/concepts/storage/volumes/#nfs) - 네트워크 파일 시스템 (NFS) 스토리지
 * `photonPersistentDisk` - Photon 컨트롤러 퍼시스턴트 디스크.
-  (이 볼륨 유형은 해당 클라우드 공급자가 없어진 이후 더 이상 
+  (이 볼륨 유형은 해당 클라우드 공급자가 없어진 이후 더 이상
   작동하지 않는다.)
 * [`portworxVolume`](/ko/docs/concepts/storage/volumes/#portworxvolume) - Portworx 볼륨
 * [`quobyte`](/ko/docs/concepts/storage/volumes/#quobyte) - Quobyte 볼륨
@@ -481,7 +487,7 @@ PV는 `storageClassName` 속성을
 * VsphereVolume
 * iSCSI
 
-마운트 옵션의 유효성이 검사되지 않으므로 마운트 옵션이 유효하지 않으면 마운트가 실패한다.
+마운트 옵션의 유효성이 검사되지 않는다. 마운트 옵션이 유효하지 않으면, 마운트가 실패한다.
 
 이전에는 `mountOptions` 속성 대신 `volume.beta.kubernetes.io/mount-options` 어노테이션이
 사용되었다. 이 어노테이션은 아직까지는 사용할 수 있지만,
@@ -622,6 +628,11 @@ spec:
 ### 네임스페이스에 대한 참고 사항
 
 퍼시스턴트볼륨 바인딩은 배타적이며, 퍼시스턴트볼륨클레임은 네임스페이스 오브젝트이므로 "다중" 모드(`ROX`, `RWX`)를 사용한 클레임은 하나의 네임스페이스 내에서만 가능하다.
+
+### `hostPath` 유형의 퍼시스턴트볼륨
+
+`hostPath` 퍼시스턴트볼륨은 노드의 파일이나 디렉터리를 사용하여 네트워크 연결 스토리지를 에뮬레이션한다.
+[`hostPath` 유형 볼륨의 예](/ko/docs/tasks/configure-pod-container/configure-persistent-volume-storage/#퍼시스턴트볼륨-생성하기)를 참고한다.
 
 ## 원시 블록 볼륨 지원
 

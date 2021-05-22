@@ -1,4 +1,11 @@
 ---
+
+
+
+
+
+
+
 title: 볼륨 스냅샷 클래스
 content_type: concept
 weight: 30
@@ -61,11 +68,11 @@ parameters:
 ### 드라이버
 
 볼륨 스냅샷 클래스에는 볼륨스냅샷의 프로비저닝에 사용되는 CSI 볼륨 플러그인을
-결정하는 드라이버를 가지고 있다. 이 필드는 반드시 지정해야한다.
+결정하는 드라이버를 가지고 있다. 이 필드는 반드시 지정해야 한다.
 
 ### 삭제정책(DeletionPolicy)
 
-볼륨 스냅샷 클래스는 삭제정책을 가지고 있다. 바인딩된 볼륨스냅샷 오브젝트를 삭제할 때 VolumeSnapshotContent의 상황을 구성할 수 있다. 볼륨 스냅삿의 삭제정책은 `Retain` 또는 `Delete` 일 수 있다. 이 필드는 반드시 지정해야 한다.
+볼륨 스냅샷 클래스는 삭제정책을 가지고 있다. 바인딩된 볼륨스냅샷 오브젝트를 삭제할 때 VolumeSnapshotContent의 상황을 구성할 수 있다. 볼륨 스냅샷 클래스의 삭제정책은 `Retain` 또는 `Delete` 일 수 있다. 이 필드는 반드시 지정해야 한다.
 
 삭제정책이 `Delete` 인 경우 기본 스토리지 스냅샷이 VolumeSnapshotContent 오브젝트와 함께 삭제된다. 삭제정책이 `Retain` 인 경우 기본 스냅샷과 VolumeSnapshotContent 모두 유지된다.
 

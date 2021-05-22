@@ -345,7 +345,7 @@ pod2             1/1     Running   0          36s
 ## Writing a ReplicaSet Spec
 
 As with all other Kubernetes API objects, a ReplicaSet needs the `apiVersion`, `kind`, and `metadata` fields.
-For ReplicaSets, the kind is always just ReplicaSet.
+For ReplicaSets, the `kind` is always a ReplicaSet.
 In Kubernetes 1.9 the API version `apps/v1` on the ReplicaSet kind is the current version and is enabled by default. The API version `apps/v1beta2` is deprecated.
 Refer to the first lines of the `frontend.yaml` example for guidance.
 
@@ -357,7 +357,7 @@ A ReplicaSet also needs a [`.spec` section](https://git.k8s.io/community/contrib
 ## 编写 ReplicaSet 的 spec
 
 与所有其他 Kubernetes API 对象一样，ReplicaSet 也需要 `apiVersion`、`kind`、和 `metadata` 字段。
-对于 ReplicaSets 而言，其 kind 始终是 ReplicaSet。
+对于 ReplicaSets 而言，其 `kind` 始终是 ReplicaSet。
 在 Kubernetes 1.9 中，ReplicaSet 上的 API 版本 `apps/v1` 是其当前版本，且被
 默认启用。API 版本 `apps/v1beta2` 已被废弃。
 参考 `frontend.yaml` 示例的第一行。
@@ -375,7 +375,7 @@ The `.spec.template` is a [pod template](/docs/concepts/workloads/pods/#pod-temp
 required to have labels in place. In our `frontend.yaml` example we had one label: `tier: frontend`.
 Be careful not to overlap with the selectors of other controllers, lest they try to adopt this Pod.
 
-For the template's [restart policy](/docs/concepts/workloads/Pods/pod-lifecycle/#restart-policy) field,
+For the template's [restart policy](/docs/concepts/workloads/pods/pod-lifecycle/#restart-policy) field,
 `.spec.template.spec.restartPolicy`, the only allowed value is `Always`, which is the default.
 -->
 ### Pod 模版
@@ -472,15 +472,15 @@ curl -X DELETE  'localhost:8080/apis/apps/v1/namespaces/default/replicasets/fron
 <!--
 ### Deleting just a ReplicaSet
 
-You can delete a ReplicaSet without affecting any of its pods using [`kubectl delete`](/docs/reference/generated/kubectl/kubectl-commands#delete) with the `-cascade=false` option.
+You can delete a ReplicaSet without affecting any of its Pods using [`kubectl delete`](/docs/reference/generated/kubectl/kubectl-commands#delete) with the `--cascade=orphan` option.
 When using the REST API or the `client-go` library, you must set `propagationPolicy` to `Orphan`.
 For example:
 -->
 ### 只删除 ReplicaSet
 
-你可以只删除 ReplicaSet 而不影响它的 Pod，方法是使用
+你可以只删除 ReplicaSet 而不影响它的 Pods，方法是使用
 [`kubectl delete`](/docs/reference/generated/kubectl/kubectl-commands#delete)
-命令并设置 `--cascade=false` 选项。
+命令并设置 `--cascade=orphan` 选项。
 
 当使用 REST API 或 `client-go` 库时，你必须将 `propagationPolicy` 设置为 `Orphan`。
 例如：

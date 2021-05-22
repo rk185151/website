@@ -1,4 +1,8 @@
 ---
+
+
+
+
 title: 중단(disruption)
 content_type: concept
 weight: 60
@@ -45,7 +49,7 @@ weight: 60
 
 - 복구 또는 업그레이드를 위한 [노드 드레이닝](/docs/tasks/administer-cluster/safely-drain-node/).
 - 클러스터의 스케일 축소를 위한
-  노드 드레이닝([클러스터 오토스케일링](/ko/docs/tasks/administer-cluster/cluster-management/#클러스터-오토스케일링)에 대해 알아보기
+  노드 드레이닝([클러스터 오토스케일링](https://github.com/kubernetes/autoscaler/#readme)에 대해 알아보기
   ).
 - 노드에 다른 무언가를 추가하기 위해 파드를 제거.
 
@@ -85,7 +89,7 @@ weight: 60
 
 ## 파드 disruption budgets
 
-{{< feature-state for_k8s_version="v1.5" state="beta" >}}
+{{< feature-state for_k8s_version="v1.21" state="stable" >}}
 
 쿠버네티스는 자발적인 중단이 자주 발생하는 경우에도 고 가용성 애플리케이션을
 실행하는 데 도움이 되는 기능을 제공한다.
@@ -99,7 +103,7 @@ PDB는 자발적 중단으로
 일정 비율 이하로 떨어지지 않도록 보장할 수 있다.
 
 클러스터 관리자와 호스팅 공급자는 직접적으로 파드나 디플로이먼트를 제거하는 대신
-[Eviction API](/docs/tasks/administer-cluster/safely-drain-node/#the-eviction-api)로
+[Eviction API](/docs/tasks/administer-cluster/safely-drain-node/#eviction-api)로
 불리는 PodDisruptionBudget을 준수하는 도구를 이용해야 한다.
 
 예를 들어, `kubectl drain` 하위 명령을 사용하면 노드를 서비스 중단으로 표시할 수
@@ -131,7 +135,7 @@ PDB는 [비자발적 중단](#자발적-중단과-비자발적-중단)이 발생
 
 Eviction API를 사용하여 파드를 축출하면,
 [PodSpec](/docs/reference/generated/kubernetes-api/{{< param "version" >}}/#podspec-v1-core)의
-`terminationGracePeriodSeconds` 설정을 준수하여 정상적으로 [종료됨](/ko/docs/concepts/workloads/pods/pod-lifecycle/#파드의-종료) 상태가 된다.)
+`terminationGracePeriodSeconds` 설정을 준수하여 정상적으로 [종료됨](/ko/docs/concepts/workloads/pods/pod-lifecycle/#파드의-종료) 상태가 된다.
 
 ## PodDisruptionBudget 예시 {#pdb-example}
 
